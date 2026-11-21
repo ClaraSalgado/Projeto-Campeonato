@@ -1091,11 +1091,20 @@ int Atualizar_Classificacao_Banco(MYSQL *conexao, int id_campeonato) {
 }
 
 
-int Carregar_Equipes_Banco(MYSQL *conexao, Equipe equipes[]) {
+int Carregar_Equipes_Banco(
+    MYSQL *conexao,
+    Equipe equipes[],
+    int id_campeonato
+) {
+    char sql[300];
 
-    const char *sql =
+    snprintf(sql, sizeof(sql),
         "SELECT ID_equipe, nome_equipe, qntd_membros, ID_campeonato "
-        "FROM equipes ORDER BY ID_equipe ASC";
+        "FROM equipes "
+        "WHERE ID_campeonato = %d "
+        "ORDER BY ID_equipe ASC",
+        id_campeonato
+    );
 
     if (mysql_query(conexao, sql)) {
         printf("Erro ao carregar equipes: %s\n",
@@ -1122,11 +1131,8 @@ int Carregar_Equipes_Banco(MYSQL *conexao, Equipe equipes[]) {
         }
 
         equipes[quantidade].id_equipe = atoi(linha[0]);
-
         strcpy(equipes[quantidade].nome_equipe, linha[1]);
-
         equipes[quantidade].qntd_membros = atoi(linha[2]);
-
         equipes[quantidade].id_campeonato = atoi(linha[3]);
 
         quantidade++;
@@ -1139,12 +1145,22 @@ int Carregar_Equipes_Banco(MYSQL *conexao, Equipe equipes[]) {
     return quantidade;
 }
 
+int Carregar_Jogadores_Banco(
+    MYSQL *conexao,
+    Jogador jogadores[],
+    int id_campeonato
+) {
+    char sql[300];
 
-int Carregar_Jogadores_Banco(MYSQL *conexao, Jogador jogadores[]) {
-
-    const char *sql =
-        "SELECT ID_jogador, nome_jogador, idade, email, telefone, ID_equipe "
-        "FROM jogadores ORDER BY ID_jogador ASC";
+    snprintf(sql, sizeof(sql),
+        "SELECT j.ID_jogador, j.nome_jogador, j.idade, "
+        "j.email, j.telefone, j.ID_equipe "
+        "FROM jogadores j "
+        "INNER JOIN equipes e ON j.ID_equipe = e.ID_equipe "
+        "WHERE e.ID_campeonato = %d "
+        "ORDER BY j.ID_jogador ASC",
+        id_campeonato
+    );
 
     if (mysql_query(conexao, sql)) {
         printf("Erro ao carregar jogadores: %s\n",
@@ -1171,15 +1187,10 @@ int Carregar_Jogadores_Banco(MYSQL *conexao, Jogador jogadores[]) {
         }
 
         jogadores[quantidade].id_jogador = atoi(linha[0]);
-
         strcpy(jogadores[quantidade].nome_jogador, linha[1]);
-
         jogadores[quantidade].idade = atoi(linha[2]);
-
         strcpy(jogadores[quantidade].email, linha[3]);
-
         strcpy(jogadores[quantidade].telefone, linha[4]);
-
         jogadores[quantidade].id_equipe = atoi(linha[5]);
 
         quantidade++;
@@ -1193,12 +1204,25 @@ int Carregar_Jogadores_Banco(MYSQL *conexao, Jogador jogadores[]) {
 }
 
 
-int Carregar_Partidas_Banco(MYSQL *conexao, Partida partidas[]) {
+int Carregar_Partidas_Banco(
+    MYSQL *conexao,
+    Partida partidas[],
+    int id_campeonato
+) {
+    char sql[500];
 
-    const char *sql =
-        "SELECT ID_partida, data_partida, horario, tempo_duracao, "
-        "equipe_1, equipe_2 "
-        "FROM partidas ORDER BY ID_partida ASC";
+    snprintf(sql, sizeof(sql),
+        "SELECT p.ID_partida, p.data_partida, p.horario, "
+        "p.tempo_duracao, p.equipe_1, p.equipe_2 "
+        "FROM partidas p "
+        "INNER JOIN equipes e1 ON p.equipe_1 = e1.ID_equipe "
+        "INNER JOIN equipes e2 ON p.equipe_2 = e2.ID_equipe "
+        "WHERE e1.ID_campeonato = %d "
+        "AND e2.ID_campeonato = %d "
+        "ORDER BY p.ID_partida ASC",
+        id_campeonato,
+        id_campeonato
+    );
 
     if (mysql_query(conexao, sql)) {
         printf("Erro ao carregar partidas: %s\n",
@@ -1225,15 +1249,10 @@ int Carregar_Partidas_Banco(MYSQL *conexao, Partida partidas[]) {
         }
 
         partidas[quantidade].id_partida = atoi(linha[0]);
-
         strcpy(partidas[quantidade].data_partida, linha[1]);
-
         strcpy(partidas[quantidade].horario, linha[2]);
-
         strcpy(partidas[quantidade].tempo_duracao, linha[3]);
-
         partidas[quantidade].equipe_1 = atoi(linha[4]);
-
         partidas[quantidade].equipe_2 = atoi(linha[5]);
 
         quantidade++;
@@ -1246,13 +1265,26 @@ int Carregar_Partidas_Banco(MYSQL *conexao, Partida partidas[]) {
     return quantidade;
 }
 
+int Carregar_Resultados_Banco(
+    MYSQL *conexao,
+    ResultadoPartida resultados[],
+    int id_campeonato
+) {
+    char sql[500];
 
-int Carregar_Resultados_Banco(MYSQL *conexao,
-                              ResultadoPartida resultados[]) {
-
-    const char *sql =
-        "SELECT ID_resultado, equipe_venc, pont_eq1, pont_eq2, ID_partida "
-        "FROM resultado_partida ORDER BY ID_resultado ASC";
+    snprintf(sql, sizeof(sql),
+        "SELECT rp.ID_resultado, rp.equipe_venc, "
+        "rp.pont_eq1, rp.pont_eq2, rp.ID_partida "
+        "FROM resultado_partida rp "
+        "INNER JOIN partidas p ON rp.ID_partida = p.ID_partida "
+        "INNER JOIN equipes e1 ON p.equipe_1 = e1.ID_equipe "
+        "INNER JOIN equipes e2 ON p.equipe_2 = e2.ID_equipe "
+        "WHERE e1.ID_campeonato = %d "
+        "AND e2.ID_campeonato = %d "
+        "ORDER BY rp.ID_resultado ASC",
+        id_campeonato,
+        id_campeonato
+    );
 
     if (mysql_query(conexao, sql)) {
         printf("Erro ao carregar resultados: %s\n",
@@ -1285,9 +1317,7 @@ int Carregar_Resultados_Banco(MYSQL *conexao,
                  "%s", linha[1]);
 
         resultados[quantidade].pont_eq1 = atoi(linha[2]);
-
         resultados[quantidade].pont_eq2 = atoi(linha[3]);
-
         resultados[quantidade].id_partida = atoi(linha[4]);
 
         quantidade++;
@@ -1299,6 +1329,7 @@ int Carregar_Resultados_Banco(MYSQL *conexao,
 
     return quantidade;
 }
+
 
 int Carregar_Classificacao_Banco(MYSQL *conexao,
                                  Classificacao classificacao[],

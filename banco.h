@@ -47,14 +47,33 @@ int Excluir_Jogador_Banco(MYSQL *conexao);
 
 int Atualizar_Classificacao_Banco(MYSQL *conexao, int id_campeonato);
 
-int Carregar_Equipes_Banco(MYSQL *conexao, Equipe equipes[]);
+int Carregar_Equipes_Banco(
+    MYSQL *conexao,
+    Equipe equipes[],
+    int id_campeonato
+);
 
-int Carregar_Jogadores_Banco(MYSQL *conexao, Jogador jogadores[]);
+int Carregar_Jogadores_Banco(
+    MYSQL *conexao,
+    Jogador jogadores[],
+    int id_campeonato
+);
 
-int Carregar_Partidas_Banco(MYSQL *conexao, Partida partidas[]);
+int Carregar_Partidas_Banco(
+    MYSQL *conexao,
+    Partida partidas[],
+    int id_campeonato
+);
 
-int Carregar_Resultados_Banco(MYSQL *conexao, ResultadoPartida resultados[]);
+int Carregar_Resultados_Banco(
+    MYSQL *conexao,
+    ResultadoPartida resultados[],
+    int id_campeonato
+);
 
-int Carregar_Classificacao_Banco(MYSQL *conexao, Classificacao classificacao[], int id_campeonato);
-
+int Carregar_Classificacao_Banco(
+    MYSQL *conexao,
+    Classificacao classificacao[],
+    int id_campeonato
+);
 #endif

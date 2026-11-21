@@ -11,112 +11,137 @@ int main(void) {
         return 1;
     }
 
+
+    int opcao;
+
+    printf("\n========== SISTEMA DE CAMPEONATOS ==========\n");
+    printf("1 - Criar novo campeonato\n");
+    printf("2 - Acessar campeonato existente\n");
+    printf("0 - Sair\n");
+    printf("Escolha uma opcao: ");
+    scanf("%d", &opcao);
+
+    if (opcao == 0) {
+        printf("Programa encerrado.\n");
+        Desconectar_Banco(conexao);
+        return 0;
+    }
+
+    if (opcao == 2) {
+
+    Campeonato campeonatos[50];
+    Equipe equipes[100];
+    Jogador jogadores[500];
+    Partida partidas[100];
+    ResultadoPartida resultados[100];
+    Classificacao classificacao[100];
+
+    int id_campeonato;
+    int qntd_equipes;
+    int qntd_jogadores;
+    int qntd_partidas;
+    int qntd_resultados;
+    int qntd_classificacao;
+
+    printf("\n========== CAMPEONATOS DISPONIVEIS ==========\n");
+
     Consultar_Campeonatos_Banco(conexao);
 
-    Consultar_Equipes_Banco(conexao);
+    printf("\nDigite o ID do campeonato que deseja acessar: ");
+    scanf("%d", &id_campeonato);
 
-    Consultar_Jogadores_Banco(conexao);
+    char sql[150];
 
-    Consultar_Partidas_Banco(conexao);
+    snprintf(sql, sizeof(sql),
+        "SELECT ID_campeonato FROM campeonato "
+        "WHERE ID_campeonato = %d",
+        id_campeonato
+    );
 
-    Consultar_Resultados_Banco(conexao);
-
-    Equipe equipes_recuperadas[100];
-
-    int qntd_equipes_recuperadas =
-        Carregar_Equipes_Banco(conexao, equipes_recuperadas);
-
-    if (qntd_equipes_recuperadas >= 0) {
-        printf("\n===== EQUIPES RECUPERADAS =====\n");
-
-        for (int i = 0; i < qntd_equipes_recuperadas; i++) {
-            printf("ID: %d | Nome: %s | Campeonato: %d\n",
-                equipes_recuperadas[i].id_equipe,
-                equipes_recuperadas[i].nome_equipe,
-                equipes_recuperadas[i].id_campeonato);
-        }
-    }
-    
-    Jogador jogadores_recuperados[500];
-
-    int qntd_jogadores_recuperados =
-        Carregar_Jogadores_Banco(conexao, jogadores_recuperados);
-
-    if (qntd_jogadores_recuperados >= 0) {
-
-        printf("\n===== JOGADORES RECUPERADOS =====\n");
-
-        for (int i = 0; i < qntd_jogadores_recuperados; i++) {
-
-            printf("ID: %d | Nome: %s | Idade: %d | Equipe: %d\n",
-                jogadores_recuperados[i].id_jogador,
-                jogadores_recuperados[i].nome_jogador,
-                jogadores_recuperados[i].idade,
-                jogadores_recuperados[i].id_equipe);
-        }
+    if (mysql_query(conexao, sql)) {
+        printf("Erro ao consultar campeonato.\n");
+        Desconectar_Banco(conexao);
+        return 1;
     }
 
-    Partida partidas_recuperadas[100];
+    MYSQL_RES *consulta = mysql_store_result(conexao);
+    MYSQL_ROW linha = mysql_fetch_row(consulta);
 
-int qntd_partidas_recuperadas =
-    Carregar_Partidas_Banco(conexao, partidas_recuperadas);
-
-if (qntd_partidas_recuperadas >= 0) {
-
-    printf("\n===== PARTIDAS RECUPERADAS =====\n");
-
-    for (int i = 0; i < qntd_partidas_recuperadas; i++) {
-
-        printf("ID: %d | Data: %s | Horario: %s | "
-               "Equipe 1: %d | Equipe 2: %d\n",
-               partidas_recuperadas[i].id_partida,
-               partidas_recuperadas[i].data_partida,
-               partidas_recuperadas[i].horario,
-               partidas_recuperadas[i].equipe_1,
-               partidas_recuperadas[i].equipe_2);
+    if (linha == NULL) {
+        printf("Campeonato nao encontrado.\n");
+        mysql_free_result(consulta);
+        Desconectar_Banco(conexao);
+        return 0;
     }
+
+    mysql_free_result(consulta);
+
+    printf("\nCampeonato encontrado! Recuperando dados...\n");
+
+    qntd_equipes = Carregar_Equipes_Banco(
+        conexao, equipes, id_campeonato
+    );
+
+    qntd_jogadores = Carregar_Jogadores_Banco(
+        conexao, jogadores, id_campeonato
+    );
+
+    qntd_partidas = Carregar_Partidas_Banco(
+        conexao, partidas, id_campeonato
+    );
+
+    qntd_resultados = Carregar_Resultados_Banco(
+        conexao, resultados, id_campeonato
+    );
+
+    qntd_classificacao = Carregar_Classificacao_Banco(
+        conexao, classificacao, id_campeonato
+    );
+
+    if (qntd_equipes < 0 ||
+        qntd_jogadores < 0 ||
+        qntd_partidas < 0 ||
+        qntd_resultados < 0 ||
+        qntd_classificacao < 0) {
+
+        printf("Erro ao recuperar os dados do campeonato.\n");
+        Desconectar_Banco(conexao);
+        return 1;
+    }
+
+    printf("\n========== EQUIPES DO CAMPEONATO ==========\n");
+
+for (int i = 0; i < qntd_equipes; i++) {
+    printf("\nID da equipe: %d\n", equipes[i].id_equipe);
+    printf("Nome: %s\n", equipes[i].nome_equipe);
+    printf("Quantidade de membros: %d\n", equipes[i].qntd_membros);
 }
 
-ResultadoPartida resultados_recuperados[100];
 
-int qntd_resultados_recuperados =
-    Carregar_Resultados_Banco(conexao, resultados_recuperados);
+printf("\n========== JOGADORES DO CAMPEONATO ==========\n");
 
-if (qntd_resultados_recuperados >= 0) {
-
-    printf("\n===== RESULTADOS RECUPERADOS =====\n");
-
-    for (int i = 0; i < qntd_resultados_recuperados; i++) {
-
-        printf("ID: %d | Equipe vencedora: %s | "
-               "Pontuacao 1: %d | Pontuacao 2: %d | Partida: %d\n",
-               resultados_recuperados[i].id_resultado,
-               resultados_recuperados[i].equipe_venc,
-               resultados_recuperados[i].pont_eq1,
-               resultados_recuperados[i].pont_eq2,
-               resultados_recuperados[i].id_partida);
-    }
+for (int i = 0; i < qntd_jogadores; i++) {
+    printf("\nID do jogador: %d\n", jogadores[i].id_jogador);
+    printf("Nome: %s\n", jogadores[i].nome_jogador);
+    printf("Idade: %d\n", jogadores[i].idade);
+    printf("Email: %s\n", jogadores[i].email);
+    printf("Telefone: %s\n", jogadores[i].telefone);
+    printf("ID da equipe: %d\n", jogadores[i].id_equipe);
 }
 
-Classificacao classificacao_recuperada[100];
+    printf("\nDados recuperados com sucesso!\n");
 
-int qntd_classificacao_recuperada =
-    Carregar_Classificacao_Banco(conexao,
-                                 classificacao_recuperada,
-                                 9);
-
-if (qntd_classificacao_recuperada >= 0) {
-
-    printf("\n===== CLASSIFICACAO RECUPERADA =====\n");
-
-    for (int i = 0; i < qntd_classificacao_recuperada; i++) {
-
-        printf("Posicao: %d | Equipe: %d | Pontuacao: %d\n",
-               classificacao_recuperada[i].posicao,
-               classificacao_recuperada[i].id_equipe,
-               classificacao_recuperada[i].pontuacao);
-    }
+    Desconectar_Banco(conexao);
+    return 0;
 }
+
+    if (opcao != 1) {
+        printf("Opcao invalida.\n");
+        Desconectar_Banco(conexao);
+        return 1;
+    }
+
+    if (opcao == 1) {
 
     Campeonato campeonatos[50];
     Equipe equipes[100];
@@ -444,6 +469,8 @@ printf("Classificacao salva no MySQL!\n");
     Atualizar_Nome_Equipe_Banco(conexao);
 
     Excluir_Jogador_Banco(conexao);
+
+    } 
 
     printf("\nPrograma encerrado.\n");
 
