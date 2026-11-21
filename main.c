@@ -343,14 +343,8 @@ printf("Classificacao salva no MySQL!\n");
         }
     }
 
-    Atualizar_Nome_Equipe_Banco(conexao);
-
-    printf("\nPrograma encerrado.\n");
-
-    Desconectar_Banco(conexao);
-
     
-
+    Atualizar_Nome_Equipe_Banco(conexao);
 
     Excluir_Jogador_Banco(conexao);
 
@@ -358,10 +352,6 @@ printf("Classificacao salva no MySQL!\n");
 
     Desconectar_Banco(conexao);
 
-
-    printf("\nPrograma encerrado.\n");
-
-    Desconectar_Banco(conexao);
-
     return 0;
+
 }
