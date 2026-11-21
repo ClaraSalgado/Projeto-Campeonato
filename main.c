@@ -11,7 +11,7 @@ int main(void) {
         return 1;
     }
 
-    /*Consultar_Campeonatos_Banco(conexao);
+    Consultar_Campeonatos_Banco(conexao);
 
     Consultar_Equipes_Banco(conexao);
 
@@ -21,7 +21,102 @@ int main(void) {
 
     Consultar_Resultados_Banco(conexao);
 
-    Consultar_Classificacao_Banco(conexao); */
+    Equipe equipes_recuperadas[100];
+
+    int qntd_equipes_recuperadas =
+        Carregar_Equipes_Banco(conexao, equipes_recuperadas);
+
+    if (qntd_equipes_recuperadas >= 0) {
+        printf("\n===== EQUIPES RECUPERADAS =====\n");
+
+        for (int i = 0; i < qntd_equipes_recuperadas; i++) {
+            printf("ID: %d | Nome: %s | Campeonato: %d\n",
+                equipes_recuperadas[i].id_equipe,
+                equipes_recuperadas[i].nome_equipe,
+                equipes_recuperadas[i].id_campeonato);
+        }
+    }
+    
+    Jogador jogadores_recuperados[500];
+
+    int qntd_jogadores_recuperados =
+        Carregar_Jogadores_Banco(conexao, jogadores_recuperados);
+
+    if (qntd_jogadores_recuperados >= 0) {
+
+        printf("\n===== JOGADORES RECUPERADOS =====\n");
+
+        for (int i = 0; i < qntd_jogadores_recuperados; i++) {
+
+            printf("ID: %d | Nome: %s | Idade: %d | Equipe: %d\n",
+                jogadores_recuperados[i].id_jogador,
+                jogadores_recuperados[i].nome_jogador,
+                jogadores_recuperados[i].idade,
+                jogadores_recuperados[i].id_equipe);
+        }
+    }
+
+    Partida partidas_recuperadas[100];
+
+int qntd_partidas_recuperadas =
+    Carregar_Partidas_Banco(conexao, partidas_recuperadas);
+
+if (qntd_partidas_recuperadas >= 0) {
+
+    printf("\n===== PARTIDAS RECUPERADAS =====\n");
+
+    for (int i = 0; i < qntd_partidas_recuperadas; i++) {
+
+        printf("ID: %d | Data: %s | Horario: %s | "
+               "Equipe 1: %d | Equipe 2: %d\n",
+               partidas_recuperadas[i].id_partida,
+               partidas_recuperadas[i].data_partida,
+               partidas_recuperadas[i].horario,
+               partidas_recuperadas[i].equipe_1,
+               partidas_recuperadas[i].equipe_2);
+    }
+}
+
+ResultadoPartida resultados_recuperados[100];
+
+int qntd_resultados_recuperados =
+    Carregar_Resultados_Banco(conexao, resultados_recuperados);
+
+if (qntd_resultados_recuperados >= 0) {
+
+    printf("\n===== RESULTADOS RECUPERADOS =====\n");
+
+    for (int i = 0; i < qntd_resultados_recuperados; i++) {
+
+        printf("ID: %d | Equipe vencedora: %s | "
+               "Pontuacao 1: %d | Pontuacao 2: %d | Partida: %d\n",
+               resultados_recuperados[i].id_resultado,
+               resultados_recuperados[i].equipe_venc,
+               resultados_recuperados[i].pont_eq1,
+               resultados_recuperados[i].pont_eq2,
+               resultados_recuperados[i].id_partida);
+    }
+}
+
+Classificacao classificacao_recuperada[100];
+
+int qntd_classificacao_recuperada =
+    Carregar_Classificacao_Banco(conexao,
+                                 classificacao_recuperada,
+                                 9);
+
+if (qntd_classificacao_recuperada >= 0) {
+
+    printf("\n===== CLASSIFICACAO RECUPERADA =====\n");
+
+    for (int i = 0; i < qntd_classificacao_recuperada; i++) {
+
+        printf("Posicao: %d | Equipe: %d | Pontuacao: %d\n",
+               classificacao_recuperada[i].posicao,
+               classificacao_recuperada[i].id_equipe,
+               classificacao_recuperada[i].pontuacao);
+    }
+}
 
     Campeonato campeonatos[50];
     Equipe equipes[100];
@@ -81,10 +176,10 @@ int main(void) {
         return 1;
     }
 
-campeonatos[qntd_campeonatos] = novo_campeonato;
+    campeonatos[qntd_campeonatos] = novo_campeonato;
 
-id_campeonato = novo_campeonato.id_campeonato;
-qntd_campeonatos++;
+    id_campeonato = novo_campeonato.id_campeonato;
+    qntd_campeonatos++;
 
 printf("\nCampeonato cadastrado com sucesso!\n");
 
@@ -249,6 +344,8 @@ for (int i = 0; i < quantidade_partidas; i++) {
         qntd_classificacao++;
     }
 
+    Consultar_Classificacao_Banco(conexao, id_campeonato);
+
     // CADASTRO DOS RESULTADOS
 
     printf("\n========== RESULTADOS ==========\n");
@@ -279,10 +376,10 @@ for (int i = 0; i < qntd_partidas; i++) {
             return 1;
         }
 
-        if (!Atualizar_Classificacao_Banco(conexao)) {
-        printf("Erro ao atualizar classificacao.\n");
-        Desconectar_Banco(conexao);
-        return 1;
+       if (!Atualizar_Classificacao_Banco(conexao, id_campeonato)) {
+            printf("Erro ao atualizar classificacao.\n");
+            Desconectar_Banco(conexao);
+            return 1;
         }
 
         qntd_resultados++;

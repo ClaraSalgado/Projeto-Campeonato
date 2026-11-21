@@ -37,7 +37,7 @@ void Consultar_Partidas_Banco(MYSQL *conexao);
 
 void Consultar_Resultados_Banco(MYSQL *conexao);
 
-void Consultar_Classificacao_Banco(MYSQL *conexao);
+void Consultar_Classificacao_Banco(MYSQL *conexao, int id_campeonato);
 
 
 int Atualizar_Nome_Equipe_Banco(MYSQL *conexao);
@@ -45,6 +45,16 @@ int Atualizar_Nome_Equipe_Banco(MYSQL *conexao);
 
 int Excluir_Jogador_Banco(MYSQL *conexao);
 
-int Atualizar_Classificacao_Banco(MYSQL *conexao);
+int Atualizar_Classificacao_Banco(MYSQL *conexao, int id_campeonato);
+
+int Carregar_Equipes_Banco(MYSQL *conexao, Equipe equipes[]);
+
+int Carregar_Jogadores_Banco(MYSQL *conexao, Jogador jogadores[]);
+
+int Carregar_Partidas_Banco(MYSQL *conexao, Partida partidas[]);
+
+int Carregar_Resultados_Banco(MYSQL *conexao, ResultadoPartida resultados[]);
+
+int Carregar_Classificacao_Banco(MYSQL *conexao, Classificacao classificacao[], int id_campeonato);
 
 #endif

@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "banco.h"
 
 MYSQL *Conectar_Banco(void) {
@@ -798,11 +799,20 @@ void Consultar_Resultados_Banco(MYSQL *conexao) {
     mysql_free_result(resultado);
 }
 
-void Consultar_Classificacao_Banco(MYSQL *conexao) {
 
-    const char *sql =
-        "SELECT ID_classificacao, pontuacao, posicao, ID_equipe "
-        "FROM classificacao ORDER BY posicao ASC";
+void Consultar_Classificacao_Banco(MYSQL *conexao, int id_campeonato) {
+
+    char sql[512];
+
+    snprintf(sql, sizeof(sql),
+        "SELECT c.ID_classificacao, c.pontuacao, "
+        "c.posicao, c.ID_equipe, e.nome_equipe "
+        "FROM classificacao c "
+        "INNER JOIN equipes e ON c.ID_equipe = e.ID_equipe "
+        "WHERE e.ID_campeonato = %d "
+        "ORDER BY c.posicao ASC",
+        id_campeonato
+    );
 
     if (mysql_query(conexao, sql)) {
         printf("Erro ao consultar classificacao: %s\n",
@@ -820,7 +830,7 @@ void Consultar_Classificacao_Banco(MYSQL *conexao) {
 
     MYSQL_ROW linha;
 
-    printf("\n========== CLASSIFICACAO ==========\n");
+    printf("\n========== CLASSIFICACAO DO CAMPEONATO ==========\n");
 
     while ((linha = mysql_fetch_row(resultado)) != NULL) {
 
@@ -828,10 +838,12 @@ void Consultar_Classificacao_Banco(MYSQL *conexao) {
         printf("Pontuacao: %s\n", linha[1]);
         printf("Posicao: %s\n", linha[2]);
         printf("ID da equipe: %s\n", linha[3]);
+        printf("Nome da equipe: %s\n", linha[4]);
     }
 
     mysql_free_result(resultado);
 }
+
 
 
 int Atualizar_Nome_Equipe_Banco(MYSQL *conexao) {
@@ -958,7 +970,8 @@ int Excluir_Jogador_Banco(MYSQL *conexao) {
     return 1;
 }
 
-int Atualizar_Classificacao_Banco(MYSQL *conexao) {
+
+int Atualizar_Classificacao_Banco(MYSQL *conexao, int id_campeonato) {
 
     // Inicia uma transacao
     if (mysql_query(conexao, "START TRANSACTION")) {
@@ -967,17 +980,48 @@ int Atualizar_Classificacao_Banco(MYSQL *conexao) {
         return 0;
     }
 
-    // Remove a classificacao anterior
-    if (mysql_query(conexao, "DELETE FROM classificacao")) {
-        printf("Erro ao limpar classificacao: %s\n",
-               mysql_error(conexao));
+    // Remove somente a classificacao das equipes deste campeonato
+    const char *sql_delete =
+        "DELETE c FROM classificacao c "
+        "INNER JOIN equipes e ON c.ID_equipe = e.ID_equipe "
+        "WHERE e.ID_campeonato = ?";
 
+    MYSQL_STMT *stmt = mysql_stmt_init(conexao);
+
+    if (stmt == NULL) {
         mysql_query(conexao, "ROLLBACK");
         return 0;
     }
 
-    // Recalcula os pontos de todas as equipes
-    const char *sql =
+    if (mysql_stmt_prepare(stmt, sql_delete, strlen(sql_delete))) {
+        printf("Erro ao preparar exclusao: %s\n",
+               mysql_stmt_error(stmt));
+        mysql_stmt_close(stmt);
+        mysql_query(conexao, "ROLLBACK");
+        return 0;
+    }
+
+    MYSQL_BIND parametro;
+    memset(&parametro, 0, sizeof(parametro));
+
+    parametro.buffer_type = MYSQL_TYPE_LONG;
+    parametro.buffer = &id_campeonato;
+
+    if (mysql_stmt_bind_param(stmt, &parametro) ||
+        mysql_stmt_execute(stmt)) {
+
+        printf("Erro ao limpar classificacao: %s\n",
+               mysql_stmt_error(stmt));
+
+        mysql_stmt_close(stmt);
+        mysql_query(conexao, "ROLLBACK");
+        return 0;
+    }
+
+    mysql_stmt_close(stmt);
+
+    // Recalcula os pontos somente das equipes deste campeonato
+    const char *sql_insert =
         "INSERT INTO classificacao (pontuacao, posicao, ID_equipe) "
         "SELECT totais.pontuacao, "
         "ROW_NUMBER() OVER (ORDER BY totais.pontuacao DESC, totais.ID_equipe ASC), "
@@ -996,16 +1040,42 @@ int Atualizar_Classificacao_Banco(MYSQL *conexao) {
         "INNER JOIN resultado_partida rp "
         "ON p.ID_partida = rp.ID_partida "
         ") r ON e.ID_equipe = r.ID_equipe "
+        "WHERE e.ID_campeonato = ? "
         "GROUP BY e.ID_equipe "
         ") totais";
 
-    if (mysql_query(conexao, sql)) {
-        printf("Erro ao recalcular classificacao: %s\n",
-               mysql_error(conexao));
+    stmt = mysql_stmt_init(conexao);
 
+    if (stmt == NULL) {
         mysql_query(conexao, "ROLLBACK");
         return 0;
     }
+
+    if (mysql_stmt_prepare(stmt, sql_insert, strlen(sql_insert))) {
+        printf("Erro ao preparar recalculo: %s\n",
+               mysql_stmt_error(stmt));
+        mysql_stmt_close(stmt);
+        mysql_query(conexao, "ROLLBACK");
+        return 0;
+    }
+
+    memset(&parametro, 0, sizeof(parametro));
+
+    parametro.buffer_type = MYSQL_TYPE_LONG;
+    parametro.buffer = &id_campeonato;
+
+    if (mysql_stmt_bind_param(stmt, &parametro) ||
+        mysql_stmt_execute(stmt)) {
+
+        printf("Erro ao recalcular classificacao: %s\n",
+               mysql_stmt_error(stmt));
+
+        mysql_stmt_close(stmt);
+        mysql_query(conexao, "ROLLBACK");
+        return 0;
+    }
+
+    mysql_stmt_close(stmt);
 
     // Confirma as alteracoes
     if (mysql_query(conexao, "COMMIT")) {
@@ -1018,4 +1088,271 @@ int Atualizar_Classificacao_Banco(MYSQL *conexao) {
     printf("\nClassificacao atualizada com sucesso!\n");
 
     return 1;
+}
+
+
+int Carregar_Equipes_Banco(MYSQL *conexao, Equipe equipes[]) {
+
+    const char *sql =
+        "SELECT ID_equipe, nome_equipe, qntd_membros, ID_campeonato "
+        "FROM equipes ORDER BY ID_equipe ASC";
+
+    if (mysql_query(conexao, sql)) {
+        printf("Erro ao carregar equipes: %s\n",
+               mysql_error(conexao));
+        return -1;
+    }
+
+    MYSQL_RES *resultado = mysql_store_result(conexao);
+
+    if (resultado == NULL) {
+        printf("Erro ao obter equipes: %s\n",
+               mysql_error(conexao));
+        return -1;
+    }
+
+    MYSQL_ROW linha;
+    int quantidade = 0;
+
+    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+
+        if (quantidade >= 100) {
+            printf("Limite de equipes atingido.\n");
+            break;
+        }
+
+        equipes[quantidade].id_equipe = atoi(linha[0]);
+
+        strcpy(equipes[quantidade].nome_equipe, linha[1]);
+
+        equipes[quantidade].qntd_membros = atoi(linha[2]);
+
+        equipes[quantidade].id_campeonato = atoi(linha[3]);
+
+        quantidade++;
+    }
+
+    mysql_free_result(resultado);
+
+    printf("\n%d equipes recuperadas do MySQL!\n", quantidade);
+
+    return quantidade;
+}
+
+
+int Carregar_Jogadores_Banco(MYSQL *conexao, Jogador jogadores[]) {
+
+    const char *sql =
+        "SELECT ID_jogador, nome_jogador, idade, email, telefone, ID_equipe "
+        "FROM jogadores ORDER BY ID_jogador ASC";
+
+    if (mysql_query(conexao, sql)) {
+        printf("Erro ao carregar jogadores: %s\n",
+               mysql_error(conexao));
+        return -1;
+    }
+
+    MYSQL_RES *resultado = mysql_store_result(conexao);
+
+    if (resultado == NULL) {
+        printf("Erro ao obter jogadores: %s\n",
+               mysql_error(conexao));
+        return -1;
+    }
+
+    MYSQL_ROW linha;
+    int quantidade = 0;
+
+    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+
+        if (quantidade >= 500) {
+            printf("Limite de jogadores atingido.\n");
+            break;
+        }
+
+        jogadores[quantidade].id_jogador = atoi(linha[0]);
+
+        strcpy(jogadores[quantidade].nome_jogador, linha[1]);
+
+        jogadores[quantidade].idade = atoi(linha[2]);
+
+        strcpy(jogadores[quantidade].email, linha[3]);
+
+        strcpy(jogadores[quantidade].telefone, linha[4]);
+
+        jogadores[quantidade].id_equipe = atoi(linha[5]);
+
+        quantidade++;
+    }
+
+    mysql_free_result(resultado);
+
+    printf("\n%d jogadores recuperados do MySQL!\n", quantidade);
+
+    return quantidade;
+}
+
+
+int Carregar_Partidas_Banco(MYSQL *conexao, Partida partidas[]) {
+
+    const char *sql =
+        "SELECT ID_partida, data_partida, horario, tempo_duracao, "
+        "equipe_1, equipe_2 "
+        "FROM partidas ORDER BY ID_partida ASC";
+
+    if (mysql_query(conexao, sql)) {
+        printf("Erro ao carregar partidas: %s\n",
+               mysql_error(conexao));
+        return -1;
+    }
+
+    MYSQL_RES *resultado = mysql_store_result(conexao);
+
+    if (resultado == NULL) {
+        printf("Erro ao obter partidas: %s\n",
+               mysql_error(conexao));
+        return -1;
+    }
+
+    MYSQL_ROW linha;
+    int quantidade = 0;
+
+    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+
+        if (quantidade >= 100) {
+            printf("Limite de partidas atingido.\n");
+            break;
+        }
+
+        partidas[quantidade].id_partida = atoi(linha[0]);
+
+        strcpy(partidas[quantidade].data_partida, linha[1]);
+
+        strcpy(partidas[quantidade].horario, linha[2]);
+
+        strcpy(partidas[quantidade].tempo_duracao, linha[3]);
+
+        partidas[quantidade].equipe_1 = atoi(linha[4]);
+
+        partidas[quantidade].equipe_2 = atoi(linha[5]);
+
+        quantidade++;
+    }
+
+    mysql_free_result(resultado);
+
+    printf("\n%d partidas recuperadas do MySQL!\n", quantidade);
+
+    return quantidade;
+}
+
+
+int Carregar_Resultados_Banco(MYSQL *conexao,
+                              ResultadoPartida resultados[]) {
+
+    const char *sql =
+        "SELECT ID_resultado, equipe_venc, pont_eq1, pont_eq2, ID_partida "
+        "FROM resultado_partida ORDER BY ID_resultado ASC";
+
+    if (mysql_query(conexao, sql)) {
+        printf("Erro ao carregar resultados: %s\n",
+               mysql_error(conexao));
+        return -1;
+    }
+
+    MYSQL_RES *resultado = mysql_store_result(conexao);
+
+    if (resultado == NULL) {
+        printf("Erro ao obter resultados: %s\n",
+               mysql_error(conexao));
+        return -1;
+    }
+
+    MYSQL_ROW linha;
+    int quantidade = 0;
+
+    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+
+        if (quantidade >= 100) {
+            printf("Limite de resultados atingido.\n");
+            break;
+        }
+
+        resultados[quantidade].id_resultado = atoi(linha[0]);
+
+        snprintf(resultados[quantidade].equipe_venc,
+                 sizeof(resultados[quantidade].equipe_venc),
+                 "%s", linha[1]);
+
+        resultados[quantidade].pont_eq1 = atoi(linha[2]);
+
+        resultados[quantidade].pont_eq2 = atoi(linha[3]);
+
+        resultados[quantidade].id_partida = atoi(linha[4]);
+
+        quantidade++;
+    }
+
+    mysql_free_result(resultado);
+
+    printf("\n%d resultados recuperados do MySQL!\n", quantidade);
+
+    return quantidade;
+}
+
+int Carregar_Classificacao_Banco(MYSQL *conexao,
+                                 Classificacao classificacao[],
+                                 int id_campeonato) {
+
+    char sql[300];
+
+    snprintf(sql, sizeof(sql),
+        "SELECT c.ID_classificacao, c.pontuacao, "
+        "c.posicao, c.ID_equipe "
+        "FROM classificacao c "
+        "INNER JOIN equipes e ON c.ID_equipe = e.ID_equipe "
+        "WHERE e.ID_campeonato = %d "
+        "ORDER BY c.posicao ASC",
+        id_campeonato);
+
+    if (mysql_query(conexao, sql)) {
+        printf("Erro ao carregar classificacao: %s\n",
+               mysql_error(conexao));
+        return -1;
+    }
+
+    MYSQL_RES *resultado = mysql_store_result(conexao);
+
+    if (resultado == NULL) {
+        printf("Erro ao obter classificacao: %s\n",
+               mysql_error(conexao));
+        return -1;
+    }
+
+    MYSQL_ROW linha;
+    int quantidade = 0;
+
+    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+
+        if (quantidade >= 100) {
+            printf("Limite de classificacao atingido.\n");
+            break;
+        }
+
+        classificacao[quantidade].id_classificacao = atoi(linha[0]);
+
+        classificacao[quantidade].pontuacao = atoi(linha[1]);
+
+        classificacao[quantidade].posicao = atoi(linha[2]);
+
+        classificacao[quantidade].id_equipe = atoi(linha[3]);
+
+        quantidade++;
+    }
+
+    mysql_free_result(resultado);
+
+    printf("\n%d classificacoes recuperadas do MySQL!\n", quantidade);
+
+    return quantidade;
 }
