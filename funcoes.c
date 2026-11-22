@@ -1,19 +1,24 @@
 #include <stdio.h>
 #include <string.h>
 #include "funcoes.h"
+#include "banco.h"
+
+int retorno, c, existe;
 
 // CADASTRAR CAMPEONATO
 int Cadastrar_Campeonato(
     Campeonato campeonatos[],
     int quantidade,
-    Campeonato *novo_campeonato
-) {
-    if (quantidade >= 50) {
+    Campeonato *novo_campeonato)
+{
+    if (quantidade >= 50)
+    {
         return 0;
     }
 
     if (novo_campeonato->num_equipes < 2 ||
-        novo_campeonato->num_equipes > 100) {
+        novo_campeonato->num_equipes > 100)
+    {
         return 0;
     }
 
@@ -24,36 +29,40 @@ int Cadastrar_Campeonato(
     return 1;
 }
 
-
 int Cadastrar_Equipe(
     Equipe equipes[],
     int quantidade,
     Equipe nova_equipe,
-    int id_campeonato
-) {
+    int id_campeonato)
+{
     int total_membros = 0;
 
-    if (quantidade >= 100) {
+    if (quantidade >= 100)
+    {
         return 0;
     }
 
     if (nova_equipe.qntd_membros < 1 ||
-        nova_equipe.qntd_membros > 500) {
+        nova_equipe.qntd_membros > 500)
+    {
         return 0;
     }
 
-    for (int i = 0; i < quantidade; i++) {
+    for (int i = 0; i < quantidade; i++)
+    {
 
         total_membros += equipes[i].qntd_membros;
 
         if (strcmp(equipes[i].nome_equipe,
-                   nova_equipe.nome_equipe) == 0) {
+                   nova_equipe.nome_equipe) == 0)
+        {
             printf("Nome de equipe ja cadastrado.\n");
             return 0;
         }
     }
 
-    if (total_membros + nova_equipe.qntd_membros > 500) {
+    if (total_membros + nova_equipe.qntd_membros > 500)
+    {
         return 0;
     }
 
@@ -65,15 +74,16 @@ int Cadastrar_Equipe(
     return 1;
 }
 
-
 int Buscar_Equipe_Pelo_Nome(
     Equipe equipes[],
     int quantidade,
-    char nome[]
-) {
-    for (int i = 0; i < quantidade; i++) {
+    char nome[])
+{
+    for (int i = 0; i < quantidade; i++)
+    {
 
-        if (strcmp(equipes[i].nome_equipe, nome) == 0) {
+        if (strcmp(equipes[i].nome_equipe, nome) == 0)
+        {
             return i;
         }
     }
@@ -83,22 +93,27 @@ int Buscar_Equipe_Pelo_Nome(
 int Buscar_Equipe_Pelo_ID(
     Equipe equipes[],
     int quantidade,
-    int id
-) {
+    int id)
+{
     int inicio = 0;
     int fim = quantidade - 1;
 
-    while (inicio <= fim) {
+    while (inicio <= fim)
+    {
 
         int meio = inicio + (fim - inicio) / 2;
 
-        if (equipes[meio].id_equipe == id) {
+        if (equipes[meio].id_equipe == id)
+        {
             return meio;
         }
 
-        if (equipes[meio].id_equipe < id) {
+        if (equipes[meio].id_equipe < id)
+        {
             inicio = meio + 1;
-        } else {
+        }
+        else
+        {
             fim = meio - 1;
         }
     }
@@ -106,19 +121,21 @@ int Buscar_Equipe_Pelo_ID(
     return -1;
 }
 
-
 int Cadastrar_Jogadores(
     Jogador jogadores[],
     Equipe equipes[],
-    int qntd_equipes
-) {
+    int qntd_equipes)
+{
     int total_jogadores = 0;
 
-    for (int i = 0; i < qntd_equipes; i++) {
+    for (int i = 0; i < qntd_equipes; i++)
+    {
 
-        for (int j = 0; j < equipes[i].qntd_membros; j++) {
+        for (int j = 0; j < equipes[i].qntd_membros; j++)
+        {
 
-            if (total_jogadores >= 500) {
+            if (total_jogadores >= 500)
+            {
                 return total_jogadores;
             }
 
@@ -131,25 +148,74 @@ int Cadastrar_Jogadores(
             printf("\n--- Jogador %d da equipe %s ---\n",
                    j + 1, equipes[i].nome_equipe);
 
-            printf("Nome: ");
-            scanf(" %100[^\n]",
-                  jogadores[total_jogadores].nome_jogador);
+            do
+            {
+                printf("Nome: ");
+                retorno = scanf("%100[^\n]", jogadores[total_jogadores].nome_jogador);
+                while ((c = getchar()) != '\n' && c != EOF)
+                {
+                    // descarta o resto da linha (inclusive o '\n')
+                }
+                if (retorno == EOF)
+                    return 1;
+                if (retorno != 1)
+                    printf("Nome do jogador não pode ser vazio.\n");
+            } while (retorno != 1);
 
-            printf("Idade: ");
-            scanf("%d", &jogadores[total_jogadores].idade);
-
-            while (jogadores[total_jogadores].idade < 1 ||
-                   jogadores[total_jogadores].idade > 120) {
-
-                printf("Idade invalida. Digite novamente: ");
+            do
+            {
+                printf("Idade: ");
                 scanf("%d", &jogadores[total_jogadores].idade);
-            }
+                if (jogadores[total_jogadores].idade < 1 || jogadores[total_jogadores].idade > 120)
+                {
+                    printf("Idade invalida. Digite novamente: \n");
+                }
+            } while (jogadores[total_jogadores].idade < 1 || jogadores[total_jogadores].idade > 120);
 
-            printf("Email: ");
-            scanf("%50s", jogadores[total_jogadores].email);
+            do
+            {
+                existe = 0;
+                printf("E-mail: ");
+                scanf("%50[^\n]", jogadores[total_jogadores].email);
+                existe = email_jogador_existe(conexao, jogadores[total_jogadores].email);
+                if (existe == -1)
+                {
+                    printf("Erro ao consultar o banco.\n");
+                    Desconectar_Banco(conexao);
+                    return 1;
+                }
+                if (existe == 1)
+                {
+                    printf("Já existe um jogador com esse e-mail. Digite outro e-mail.\n");
+                }
+            } while (existe);
 
-            printf("Telefone: ");
-            scanf("%14s", jogadores[total_jogadores].telefone);
+            do
+            {
+                existe = 0;
+                printf("Telefone: ");
+                retorno = scanf("%14s", jogadores[total_jogadores].telefone);
+                while ((c = getchar()) != '\n' && c != EOF)
+                {
+                    // descarta o resto da linha (inclusive o '\n')
+                }
+                if (retorno == EOF)
+                    return 1;
+                if (retorno != 1)
+                    printf("Telefone invalido. Digite novamente: \n");
+
+                existe = telefone_jogador_existe(conexao, jogadores[total_jogadores].telefone);
+                if (existe == -1)
+                {
+                    printf("Erro ao consultar o banco.\n");
+                    Desconectar_Banco(conexao);
+                    return 1;
+                }
+                if (existe == 1)
+                {
+                    printf("Já existe um jogador com esse telefone. Digite outro telefone.\n");
+                }
+            } while (retorno != 1 || existe);
 
             total_jogadores++;
         }
@@ -163,12 +229,13 @@ int Cadastrar_Partida(
     Partida partidas[],
     int quantidade,
     Equipe equipes[],
-    int qntd_equipes
-) {
+    int qntd_equipes)
+{
     int equipe1_encontrada = 0;
     int equipe2_encontrada = 0;
 
-    if (quantidade >= 100 || qntd_equipes < 2) {
+    if (quantidade >= 100 || qntd_equipes < 2)
+    {
         return 0;
     }
 
@@ -187,7 +254,8 @@ int Cadastrar_Partida(
 
     printf("\nEquipes cadastradas:\n");
 
-    for (int i = 0; i < qntd_equipes; i++) {
+    for (int i = 0; i < qntd_equipes; i++)
+    {
         printf("ID: %d | Equipe: %s\n",
                equipes[i].id_equipe,
                equipes[i].nome_equipe);
@@ -199,15 +267,18 @@ int Cadastrar_Partida(
     printf("ID da segunda equipe: ");
     scanf("%d", &partidas[quantidade].equipe_2);
 
-    for (int i = 0; i < qntd_equipes; i++) {
+    for (int i = 0; i < qntd_equipes; i++)
+    {
 
         if (equipes[i].id_equipe ==
-            partidas[quantidade].equipe_1) {
+            partidas[quantidade].equipe_1)
+        {
             equipe1_encontrada = 1;
         }
 
         if (equipes[i].id_equipe ==
-            partidas[quantidade].equipe_2) {
+            partidas[quantidade].equipe_2)
+        {
             equipe2_encontrada = 1;
         }
     }
@@ -215,7 +286,8 @@ int Cadastrar_Partida(
     if (!equipe1_encontrada ||
         !equipe2_encontrada ||
         partidas[quantidade].equipe_1 ==
-        partidas[quantidade].equipe_2) {
+            partidas[quantidade].equipe_2)
+    {
 
         printf("Equipes invalidas para a partida.\n");
         return 0;
@@ -234,8 +306,8 @@ int Cadastrar_Resultado(
     int qntd_equipes,
     Classificacao classificacao[],
     int qntd_classificacao,
-    int matriz_resultados[100][100]
-) {
+    int matriz_resultados[100][100])
+{
     int id_partida;
     int indice_partida = -1;
     int indice_equipe1 = -1;
@@ -243,7 +315,8 @@ int Cadastrar_Resultado(
     int indice_classificacao1 = -1;
     int indice_classificacao2 = -1;
 
-    if (quantidade_resultados >= 100) {
+    if (quantidade_resultados >= 100)
+    {
         return 0;
     }
 
@@ -252,20 +325,25 @@ int Cadastrar_Resultado(
     printf("ID da partida: ");
     scanf("%d", &id_partida);
 
-    for (int i = 0; i < qntd_partidas; i++) {
-        if (partidas[i].id_partida == id_partida) {
+    for (int i = 0; i < qntd_partidas; i++)
+    {
+        if (partidas[i].id_partida == id_partida)
+        {
             indice_partida = i;
             break;
         }
     }
 
-    if (indice_partida == -1) {
+    if (indice_partida == -1)
+    {
         printf("Partida nao encontrada.\n");
         return 0;
     }
 
-    for (int i = 0; i < quantidade_resultados; i++) {
-        if (resultados[i].id_partida == id_partida) {
+    for (int i = 0; i < quantidade_resultados; i++)
+    {
+        if (resultados[i].id_partida == id_partida)
+        {
             printf("Essa partida ja possui resultado.\n");
             return 0;
         }
@@ -274,24 +352,30 @@ int Cadastrar_Resultado(
     int id1 = partidas[indice_partida].equipe_1;
     int id2 = partidas[indice_partida].equipe_2;
 
-    for (int i = 0; i < qntd_equipes; i++) {
+    for (int i = 0; i < qntd_equipes; i++)
+    {
 
-        if (equipes[i].id_equipe == id1) {
+        if (equipes[i].id_equipe == id1)
+        {
             indice_equipe1 = i;
         }
 
-        if (equipes[i].id_equipe == id2) {
+        if (equipes[i].id_equipe == id2)
+        {
             indice_equipe2 = i;
         }
     }
 
-    for (int i = 0; i < qntd_classificacao; i++) {
+    for (int i = 0; i < qntd_classificacao; i++)
+    {
 
-        if (classificacao[i].id_equipe == id1) {
+        if (classificacao[i].id_equipe == id1)
+        {
             indice_classificacao1 = i;
         }
 
-        if (classificacao[i].id_equipe == id2) {
+        if (classificacao[i].id_equipe == id2)
+        {
             indice_classificacao2 = i;
         }
     }
@@ -299,7 +383,8 @@ int Cadastrar_Resultado(
     if (indice_equipe1 == -1 ||
         indice_equipe2 == -1 ||
         indice_classificacao1 == -1 ||
-        indice_classificacao2 == -1) {
+        indice_classificacao2 == -1)
+    {
         return 0;
     }
 
@@ -314,14 +399,15 @@ int Cadastrar_Resultado(
            equipes[indice_equipe2].nome_equipe);
     scanf("%d", &pontos2);
 
-    if (pontos1 < 0 || pontos2 < 0) {
+    if (pontos1 < 0 || pontos2 < 0)
+    {
         printf("Pontuacao invalida.\n");
         return 0;
     }
 
     /* Guarda os pontos feitos por cada equipe contra a adversaria.
        Os indices da matriz correspondem as posicoes no vetor equipes. */
-       
+
     matriz_resultados[indice_equipe1][indice_partida] = pontos1;
 
     matriz_resultados[indice_equipe2][indice_partida] = pontos2;
@@ -332,8 +418,6 @@ int Cadastrar_Resultado(
     resultados[quantidade_resultados].id_partida = id_partida;
     resultados[quantidade_resultados].pont_eq1 = pontos1;
     resultados[quantidade_resultados].pont_eq2 = pontos2;
-
-
 
     classificacao[indice_classificacao1].pontuacao += pontos1;
 
@@ -347,19 +431,22 @@ int Cadastrar_Resultado(
 // SELECTION SORT DA CLASSIFICACAO
 void Ordenar_Classificacao(
     Classificacao classificacao[],
-    int quantidade
-) {
+    int quantidade)
+{
     Classificacao auxiliar;
     int maior;
 
-    for (int i = 0; i < quantidade - 1; i++) {
+    for (int i = 0; i < quantidade - 1; i++)
+    {
 
         maior = i;
 
-        for (int j = i + 1; j < quantidade; j++) {
+        for (int j = i + 1; j < quantidade; j++)
+        {
 
             if (classificacao[j].pontuacao >
-                classificacao[maior].pontuacao) {
+                classificacao[maior].pontuacao)
+            {
                 maior = j;
             }
         }
@@ -369,7 +456,8 @@ void Ordenar_Classificacao(
         classificacao[maior] = auxiliar;
     }
 
-    for (int i = 0; i < quantidade; i++) {
+    for (int i = 0; i < quantidade; i++)
+    {
         classificacao[i].posicao = i + 1;
     }
 }
@@ -379,27 +467,30 @@ void Exibir_Matriz_Resultados(
     int matriz_resultados[100][100],
     Equipe equipes[],
     int qntd_equipes,
-    int qntd_partidas
-) {
+    int qntd_partidas)
+{
 
     printf("\n========== MATRIZ DE RESULTADOS ==========\n\n");
 
     printf("%-20s", "EQUIPES");
 
-    for (int j = 0; j < qntd_partidas; j++) {
+    for (int j = 0; j < qntd_partidas; j++)
+    {
         printf("%-15s", "Partida");
         printf("%-1d", j + 1);
     }
 
     printf("%-15s\n", "TOTAL");
 
-    for (int i = 0; i < qntd_equipes; i++) {
+    for (int i = 0; i < qntd_equipes; i++)
+    {
 
         int total = 0;
 
         printf("%-20.20s", equipes[i].nome_equipe);
 
-        for (int j = 0; j < qntd_partidas; j++) {
+        for (int j = 0; j < qntd_partidas; j++)
+        {
 
             printf("%-15d", matriz_resultados[i][j]);
 
