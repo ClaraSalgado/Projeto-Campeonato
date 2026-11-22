@@ -1,28 +1,29 @@
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "banco.h"
 
-MYSQL *Conectar_Banco(void) {
+MYSQL *Conectar_Banco(void)
+{
 
     MYSQL *conexao = mysql_init(NULL);
 
-    if (conexao == NULL) {
+    if (conexao == NULL)
+    {
         printf("Erro ao inicializar MySQL.\n");
         return NULL;
     }
 
     if (mysql_real_connect(
-        conexao,
-        "localhost",
-        "root",
-        "",
-        "esports",
-        3306,
-        NULL,
-        0
-    ) == NULL) {
+            conexao,
+            "localhost",
+            "root",
+            "",
+            "esports",
+            3306,
+            NULL,
+            0) == NULL)
+    {
 
         printf("Erro na conexão: %s\n", mysql_error(conexao));
 
@@ -35,18 +36,22 @@ MYSQL *Conectar_Banco(void) {
     return conexao;
 }
 
-void Desconectar_Banco(MYSQL *conexao) {
+void Desconectar_Banco(MYSQL *conexao)
+{
 
-    if (conexao != NULL) {
+    if (conexao != NULL)
+    {
         mysql_close(conexao);
     }
 }
 
-int Salvar_Campeonato_Banco(MYSQL *conexao, Campeonato *campeonato) {
+int Salvar_Campeonato_Banco(MYSQL *conexao, Campeonato *campeonato)
+{
 
     MYSQL_STMT *stmt = mysql_stmt_init(conexao);
 
-    if (stmt == NULL) {
+    if (stmt == NULL)
+    {
         printf("Erro ao iniciar comando SQL.\n");
         return 0;
     }
@@ -56,7 +61,8 @@ int Salvar_Campeonato_Banco(MYSQL *conexao, Campeonato *campeonato) {
         "(nome, jogo, data_inicio, tempo_duracao, num_equipes) "
         "VALUES (?, ?, ?, ?, ?)";
 
-    if (mysql_stmt_prepare(stmt, sql, strlen(sql))) {
+    if (mysql_stmt_prepare(stmt, sql, strlen(sql)))
+    {
         printf("Erro ao preparar SQL: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
@@ -70,8 +76,7 @@ int Salvar_Campeonato_Banco(MYSQL *conexao, Campeonato *campeonato) {
         strlen(campeonato->nome),
         strlen(campeonato->jogo),
         strlen(campeonato->data_inicio),
-        strlen(campeonato->tempo_duracao)
-    };
+        strlen(campeonato->tempo_duracao)};
 
     parametros[0].buffer_type = MYSQL_TYPE_STRING;
     parametros[0].buffer = campeonato->nome;
@@ -96,21 +101,23 @@ int Salvar_Campeonato_Banco(MYSQL *conexao, Campeonato *campeonato) {
     parametros[4].buffer_type = MYSQL_TYPE_LONG;
     parametros[4].buffer = &campeonato->num_equipes;
 
-    if (mysql_stmt_bind_param(stmt, parametros)) {
+    if (mysql_stmt_bind_param(stmt, parametros))
+    {
         printf("Erro ao associar dados: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return 0;
     }
 
-    if (mysql_stmt_execute(stmt)) {
+    if (mysql_stmt_execute(stmt))
+    {
         printf("Erro ao salvar campeonato: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return 0;
     }
 
-    campeonato->id_campeonato = (int) mysql_stmt_insert_id(stmt);
+    campeonato->id_campeonato = (int)mysql_stmt_insert_id(stmt);
 
     mysql_stmt_close(stmt);
 
@@ -119,12 +126,13 @@ int Salvar_Campeonato_Banco(MYSQL *conexao, Campeonato *campeonato) {
     return 1;
 }
 
-
-int Salvar_Equipe_Banco(MYSQL *conexao, Equipe *equipe) {
+int Salvar_Equipe_Banco(MYSQL *conexao, Equipe *equipe)
+{
 
     MYSQL_STMT *stmt = mysql_stmt_init(conexao);
 
-    if (stmt == NULL) {
+    if (stmt == NULL)
+    {
         printf("Erro ao iniciar comando SQL.\n");
         return 0;
     }
@@ -134,7 +142,8 @@ int Salvar_Equipe_Banco(MYSQL *conexao, Equipe *equipe) {
         "(nome_equipe, qntd_membros, ID_campeonato) "
         "VALUES (?, ?, ?)";
 
-    if (mysql_stmt_prepare(stmt, sql, strlen(sql))) {
+    if (mysql_stmt_prepare(stmt, sql, strlen(sql)))
+    {
         printf("Erro ao preparar SQL: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
@@ -157,21 +166,23 @@ int Salvar_Equipe_Banco(MYSQL *conexao, Equipe *equipe) {
     parametros[2].buffer_type = MYSQL_TYPE_LONG;
     parametros[2].buffer = &equipe->id_campeonato;
 
-    if (mysql_stmt_bind_param(stmt, parametros)) {
+    if (mysql_stmt_bind_param(stmt, parametros))
+    {
         printf("Erro ao associar dados: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return 0;
     }
 
-    if (mysql_stmt_execute(stmt)) {
+    if (mysql_stmt_execute(stmt))
+    {
         printf("Erro ao salvar equipe: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return 0;
     }
 
-    equipe->id_equipe = (int) mysql_stmt_insert_id(stmt);
+    equipe->id_equipe = (int)mysql_stmt_insert_id(stmt);
 
     mysql_stmt_close(stmt);
 
@@ -180,12 +191,13 @@ int Salvar_Equipe_Banco(MYSQL *conexao, Equipe *equipe) {
     return 1;
 }
 
-
-int Salvar_Jogador_Banco(MYSQL *conexao, Jogador *jogador) {
+int Salvar_Jogador_Banco(MYSQL *conexao, Jogador *jogador)
+{
 
     MYSQL_STMT *stmt = mysql_stmt_init(conexao);
 
-    if (stmt == NULL) {
+    if (stmt == NULL)
+    {
         printf("Erro ao iniciar comando SQL.\n");
         return 0;
     }
@@ -195,7 +207,8 @@ int Salvar_Jogador_Banco(MYSQL *conexao, Jogador *jogador) {
         "(nome_jogador, idade, email, telefone, ID_equipe) "
         "VALUES (?, ?, ?, ?, ?)";
 
-    if (mysql_stmt_prepare(stmt, sql, strlen(sql))) {
+    if (mysql_stmt_prepare(stmt, sql, strlen(sql)))
+    {
         printf("Erro ao preparar SQL: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
@@ -230,21 +243,23 @@ int Salvar_Jogador_Banco(MYSQL *conexao, Jogador *jogador) {
     parametros[4].buffer_type = MYSQL_TYPE_LONG;
     parametros[4].buffer = &jogador->id_equipe;
 
-    if (mysql_stmt_bind_param(stmt, parametros)) {
+    if (mysql_stmt_bind_param(stmt, parametros))
+    {
         printf("Erro ao associar dados: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return 0;
     }
 
-    if (mysql_stmt_execute(stmt)) {
+    if (mysql_stmt_execute(stmt))
+    {
         printf("Erro ao salvar jogador: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return 0;
     }
 
-    jogador->id_jogador = (int) mysql_stmt_insert_id(stmt);
+    jogador->id_jogador = (int)mysql_stmt_insert_id(stmt);
 
     mysql_stmt_close(stmt);
 
@@ -254,13 +269,13 @@ int Salvar_Jogador_Banco(MYSQL *conexao, Jogador *jogador) {
     return 1;
 }
 
-
-
-int Salvar_Partida_Banco(MYSQL *conexao, Partida *partida) {
+int Salvar_Partida_Banco(MYSQL *conexao, Partida *partida)
+{
 
     MYSQL_STMT *stmt = mysql_stmt_init(conexao);
 
-    if (stmt == NULL) {
+    if (stmt == NULL)
+    {
         printf("Erro ao iniciar comando SQL.\n");
         return 0;
     }
@@ -270,7 +285,8 @@ int Salvar_Partida_Banco(MYSQL *conexao, Partida *partida) {
         "(data_partida, horario, tempo_duracao, equipe_1, equipe_2) "
         "VALUES (?, ?, ?, ?, ?)";
 
-    if (mysql_stmt_prepare(stmt, sql, strlen(sql))) {
+    if (mysql_stmt_prepare(stmt, sql, strlen(sql)))
+    {
         printf("Erro ao preparar SQL: %s\n", mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return 0;
@@ -304,19 +320,21 @@ int Salvar_Partida_Banco(MYSQL *conexao, Partida *partida) {
     parametros[4].buffer_type = MYSQL_TYPE_LONG;
     parametros[4].buffer = &partida->equipe_2;
 
-    if (mysql_stmt_bind_param(stmt, parametros)) {
+    if (mysql_stmt_bind_param(stmt, parametros))
+    {
         printf("Erro ao associar dados: %s\n", mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return 0;
     }
 
-    if (mysql_stmt_execute(stmt)) {
+    if (mysql_stmt_execute(stmt))
+    {
         printf("Erro ao salvar partida: %s\n", mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return 0;
     }
 
-    partida->id_partida = (int) mysql_stmt_insert_id(stmt);
+    partida->id_partida = (int)mysql_stmt_insert_id(stmt);
 
     mysql_stmt_close(stmt);
 
@@ -325,15 +343,15 @@ int Salvar_Partida_Banco(MYSQL *conexao, Partida *partida) {
     return 1;
 }
 
-
 int Salvar_Resultado_Banco(
     MYSQL *conexao,
-    ResultadoPartida *resultado
-) {
+    ResultadoPartida *resultado)
+{
 
     MYSQL_STMT *stmt = mysql_stmt_init(conexao);
 
-    if (stmt == NULL) {
+    if (stmt == NULL)
+    {
         printf("Erro ao iniciar comando SQL.\n");
         return 0;
     }
@@ -343,7 +361,8 @@ int Salvar_Resultado_Banco(
         "(equipe_venc, pont_eq1, pont_eq2, ID_partida) "
         "VALUES (?, ?, ?, ?)";
 
-    if (mysql_stmt_prepare(stmt, sql, strlen(sql))) {
+    if (mysql_stmt_prepare(stmt, sql, strlen(sql)))
+    {
         printf("Erro ao preparar SQL: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
@@ -370,14 +389,16 @@ int Salvar_Resultado_Banco(
     parametros[3].buffer_type = MYSQL_TYPE_LONG;
     parametros[3].buffer = &resultado->id_partida;
 
-    if (mysql_stmt_bind_param(stmt, parametros)) {
+    if (mysql_stmt_bind_param(stmt, parametros))
+    {
         printf("Erro ao associar dados: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return 0;
     }
 
-    if (mysql_stmt_execute(stmt)) {
+    if (mysql_stmt_execute(stmt))
+    {
         printf("Erro ao salvar resultado: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
@@ -385,7 +406,7 @@ int Salvar_Resultado_Banco(
     }
 
     resultado->id_resultado =
-        (int) mysql_stmt_insert_id(stmt);
+        (int)mysql_stmt_insert_id(stmt);
 
     mysql_stmt_close(stmt);
 
@@ -397,12 +418,13 @@ int Salvar_Resultado_Banco(
 
 int Salvar_Classificacao_Banco(
     MYSQL *conexao,
-    Classificacao *classificacao
-) {
+    Classificacao *classificacao)
+{
 
     MYSQL_STMT *stmt = mysql_stmt_init(conexao);
 
-    if (stmt == NULL) {
+    if (stmt == NULL)
+    {
         printf("Erro ao iniciar comando SQL.\n");
         return 0;
     }
@@ -413,7 +435,8 @@ int Salvar_Classificacao_Banco(
         "SELECT ID_classificacao FROM classificacao "
         "WHERE ID_equipe = ? LIMIT 1";
 
-    if (mysql_stmt_prepare(stmt, sql_busca, strlen(sql_busca))) {
+    if (mysql_stmt_prepare(stmt, sql_busca, strlen(sql_busca)))
+    {
         printf("Erro ao preparar consulta: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
@@ -427,7 +450,8 @@ int Salvar_Classificacao_Banco(
     parametro_busca.buffer = &classificacao->id_equipe;
 
     if (mysql_stmt_bind_param(stmt, &parametro_busca) ||
-        mysql_stmt_execute(stmt)) {
+        mysql_stmt_execute(stmt))
+    {
 
         printf("Erro ao consultar classificacao: %s\n",
                mysql_stmt_error(stmt));
@@ -446,7 +470,8 @@ int Salvar_Classificacao_Banco(
     resultado_busca.is_null = &existe;
 
     if (mysql_stmt_bind_result(stmt, &resultado_busca) ||
-        mysql_stmt_store_result(stmt)) {
+        mysql_stmt_store_result(stmt))
+    {
 
         printf("Erro ao obter classificacao: %s\n",
                mysql_stmt_error(stmt));
@@ -461,7 +486,8 @@ int Salvar_Classificacao_Banco(
 
     // Se encontrou, atualiza. Caso contrario, insere.
 
-    if (encontrou) {
+    if (encontrou)
+    {
 
         const char *sql_update =
             "UPDATE classificacao SET pontuacao = ?, posicao = ? "
@@ -469,11 +495,13 @@ int Salvar_Classificacao_Banco(
 
         stmt = mysql_stmt_init(conexao);
 
-        if (stmt == NULL) {
+        if (stmt == NULL)
+        {
             return 0;
         }
 
-        if (mysql_stmt_prepare(stmt, sql_update, strlen(sql_update))) {
+        if (mysql_stmt_prepare(stmt, sql_update, strlen(sql_update)))
+        {
             printf("Erro ao preparar UPDATE: %s\n",
                    mysql_stmt_error(stmt));
             mysql_stmt_close(stmt);
@@ -493,7 +521,8 @@ int Salvar_Classificacao_Banco(
         parametros[2].buffer = &classificacao->id_equipe;
 
         if (mysql_stmt_bind_param(stmt, parametros) ||
-            mysql_stmt_execute(stmt)) {
+            mysql_stmt_execute(stmt))
+        {
 
             printf("Erro ao atualizar classificacao: %s\n",
                    mysql_stmt_error(stmt));
@@ -505,8 +534,9 @@ int Salvar_Classificacao_Banco(
 
         printf("Classificacao da equipe %d atualizada!\n",
                classificacao->id_equipe);
-
-    } else {
+    }
+    else
+    {
 
         const char *sql_insert =
             "INSERT INTO classificacao "
@@ -514,11 +544,13 @@ int Salvar_Classificacao_Banco(
 
         stmt = mysql_stmt_init(conexao);
 
-        if (stmt == NULL) {
+        if (stmt == NULL)
+        {
             return 0;
         }
 
-        if (mysql_stmt_prepare(stmt, sql_insert, strlen(sql_insert))) {
+        if (mysql_stmt_prepare(stmt, sql_insert, strlen(sql_insert)))
+        {
             printf("Erro ao preparar INSERT: %s\n",
                    mysql_stmt_error(stmt));
             mysql_stmt_close(stmt);
@@ -538,7 +570,8 @@ int Salvar_Classificacao_Banco(
         parametros[2].buffer = &classificacao->id_equipe;
 
         if (mysql_stmt_bind_param(stmt, parametros) ||
-            mysql_stmt_execute(stmt)) {
+            mysql_stmt_execute(stmt))
+        {
 
             printf("Erro ao inserir classificacao: %s\n",
                    mysql_stmt_error(stmt));
@@ -547,7 +580,7 @@ int Salvar_Classificacao_Banco(
         }
 
         classificacao->id_classificacao =
-            (int) mysql_stmt_insert_id(stmt);
+            (int)mysql_stmt_insert_id(stmt);
 
         mysql_stmt_close(stmt);
 
@@ -615,15 +648,15 @@ int Salvar_Classificacao_Banco(
     return 1;
 }*/
 
-
-
-void Consultar_Campeonatos_Banco(MYSQL *conexao) {
+void Consultar_Campeonatos_Banco(MYSQL *conexao)
+{
 
     const char *sql =
         "SELECT ID_campeonato, nome, jogo, data_inicio, "
         "tempo_duracao, num_equipes FROM campeonato";
 
-    if (mysql_query(conexao, sql)) {
+    if (mysql_query(conexao, sql))
+    {
         printf("Erro ao consultar campeonatos: %s\n",
                mysql_error(conexao));
         return;
@@ -631,7 +664,8 @@ void Consultar_Campeonatos_Banco(MYSQL *conexao) {
 
     MYSQL_RES *resultado = mysql_store_result(conexao);
 
-    if (resultado == NULL) {
+    if (resultado == NULL)
+    {
         printf("Erro ao obter resultados: %s\n",
                mysql_error(conexao));
         return;
@@ -641,7 +675,8 @@ void Consultar_Campeonatos_Banco(MYSQL *conexao) {
 
     printf("\n========== CAMPEONATOS CADASTRADOS ==========\n");
 
-    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+    while ((linha = mysql_fetch_row(resultado)) != NULL)
+    {
 
         printf("\nID: %s\n", linha[0]);
         printf("Nome: %s\n", linha[1]);
@@ -654,13 +689,15 @@ void Consultar_Campeonatos_Banco(MYSQL *conexao) {
     mysql_free_result(resultado);
 }
 
-void Consultar_Equipes_Banco(MYSQL *conexao) {
+void Consultar_Equipes_Banco(MYSQL *conexao)
+{
 
     const char *sql =
         "SELECT ID_equipe, nome_equipe, qntd_membros, ID_campeonato "
         "FROM equipes";
 
-    if (mysql_query(conexao, sql)) {
+    if (mysql_query(conexao, sql))
+    {
         printf("Erro ao consultar equipes: %s\n",
                mysql_error(conexao));
         return;
@@ -668,7 +705,8 @@ void Consultar_Equipes_Banco(MYSQL *conexao) {
 
     MYSQL_RES *resultado = mysql_store_result(conexao);
 
-    if (resultado == NULL) {
+    if (resultado == NULL)
+    {
         printf("Erro ao obter resultados: %s\n",
                mysql_error(conexao));
         return;
@@ -678,7 +716,8 @@ void Consultar_Equipes_Banco(MYSQL *conexao) {
 
     printf("\n========== EQUIPES CADASTRADAS ==========\n");
 
-    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+    while ((linha = mysql_fetch_row(resultado)) != NULL)
+    {
 
         printf("\nID da equipe: %s\n", linha[0]);
         printf("Nome: %s\n", linha[1]);
@@ -689,13 +728,15 @@ void Consultar_Equipes_Banco(MYSQL *conexao) {
     mysql_free_result(resultado);
 }
 
-void Consultar_Jogadores_Banco(MYSQL *conexao) {
+void Consultar_Jogadores_Banco(MYSQL *conexao)
+{
 
     const char *sql =
         "SELECT ID_jogador, nome_jogador, idade, email, telefone, ID_equipe "
         "FROM jogadores";
 
-    if (mysql_query(conexao, sql)) {
+    if (mysql_query(conexao, sql))
+    {
         printf("Erro ao consultar jogadores: %s\n",
                mysql_error(conexao));
         return;
@@ -703,7 +744,8 @@ void Consultar_Jogadores_Banco(MYSQL *conexao) {
 
     MYSQL_RES *resultado = mysql_store_result(conexao);
 
-    if (resultado == NULL) {
+    if (resultado == NULL)
+    {
         printf("Erro ao obter resultados: %s\n",
                mysql_error(conexao));
         return;
@@ -713,7 +755,8 @@ void Consultar_Jogadores_Banco(MYSQL *conexao) {
 
     printf("\n========== JOGADORES CADASTRADOS ==========\n");
 
-    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+    while ((linha = mysql_fetch_row(resultado)) != NULL)
+    {
 
         printf("\nID do jogador: %s\n", linha[0]);
         printf("Nome: %s\n", linha[1]);
@@ -726,13 +769,15 @@ void Consultar_Jogadores_Banco(MYSQL *conexao) {
     mysql_free_result(resultado);
 }
 
-void Consultar_Partidas_Banco(MYSQL *conexao) {
+void Consultar_Partidas_Banco(MYSQL *conexao)
+{
 
     const char *sql =
         "SELECT ID_partida, data_partida, horario, "
         "tempo_duracao, equipe_1, equipe_2 FROM partidas";
 
-    if (mysql_query(conexao, sql)) {
+    if (mysql_query(conexao, sql))
+    {
         printf("Erro ao consultar partidas: %s\n",
                mysql_error(conexao));
         return;
@@ -740,7 +785,8 @@ void Consultar_Partidas_Banco(MYSQL *conexao) {
 
     MYSQL_RES *resultado = mysql_store_result(conexao);
 
-    if (resultado == NULL) {
+    if (resultado == NULL)
+    {
         printf("Erro ao obter resultados: %s\n",
                mysql_error(conexao));
         return;
@@ -750,7 +796,8 @@ void Consultar_Partidas_Banco(MYSQL *conexao) {
 
     printf("\n========== PARTIDAS CADASTRADAS ==========\n");
 
-    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+    while ((linha = mysql_fetch_row(resultado)) != NULL)
+    {
 
         printf("\nID da partida: %s\n", linha[0]);
         printf("Data: %s\n", linha[1]);
@@ -763,13 +810,15 @@ void Consultar_Partidas_Banco(MYSQL *conexao) {
     mysql_free_result(resultado);
 }
 
-void Consultar_Resultados_Banco(MYSQL *conexao) {
+void Consultar_Resultados_Banco(MYSQL *conexao)
+{
 
     const char *sql =
         "SELECT ID_resultado, equipe_venc, pont_eq1, "
         "pont_eq2, ID_partida FROM resultado_partida";
 
-    if (mysql_query(conexao, sql)) {
+    if (mysql_query(conexao, sql))
+    {
         printf("Erro ao consultar resultados: %s\n",
                mysql_error(conexao));
         return;
@@ -777,7 +826,8 @@ void Consultar_Resultados_Banco(MYSQL *conexao) {
 
     MYSQL_RES *resultado = mysql_store_result(conexao);
 
-    if (resultado == NULL) {
+    if (resultado == NULL)
+    {
         printf("Erro ao obter resultados: %s\n",
                mysql_error(conexao));
         return;
@@ -787,7 +837,8 @@ void Consultar_Resultados_Banco(MYSQL *conexao) {
 
     printf("\n========== RESULTADOS DAS PARTIDAS ==========\n");
 
-    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+    while ((linha = mysql_fetch_row(resultado)) != NULL)
+    {
 
         printf("\nID do resultado: %s\n", linha[0]);
         printf("Equipe vencedora: %s\n", linha[1]);
@@ -799,22 +850,22 @@ void Consultar_Resultados_Banco(MYSQL *conexao) {
     mysql_free_result(resultado);
 }
 
-
-void Consultar_Classificacao_Banco(MYSQL *conexao, int id_campeonato) {
+void Consultar_Classificacao_Banco(MYSQL *conexao, int id_campeonato)
+{
 
     char sql[512];
 
     snprintf(sql, sizeof(sql),
-        "SELECT c.ID_classificacao, c.pontuacao, "
-        "c.posicao, c.ID_equipe, e.nome_equipe "
-        "FROM classificacao c "
-        "INNER JOIN equipes e ON c.ID_equipe = e.ID_equipe "
-        "WHERE e.ID_campeonato = %d "
-        "ORDER BY c.posicao ASC",
-        id_campeonato
-    );
+             "SELECT c.ID_classificacao, c.pontuacao, "
+             "c.posicao, c.ID_equipe, e.nome_equipe "
+             "FROM classificacao c "
+             "INNER JOIN equipes e ON c.ID_equipe = e.ID_equipe "
+             "WHERE e.ID_campeonato = %d "
+             "ORDER BY c.posicao ASC",
+             id_campeonato);
 
-    if (mysql_query(conexao, sql)) {
+    if (mysql_query(conexao, sql))
+    {
         printf("Erro ao consultar classificacao: %s\n",
                mysql_error(conexao));
         return;
@@ -822,7 +873,8 @@ void Consultar_Classificacao_Banco(MYSQL *conexao, int id_campeonato) {
 
     MYSQL_RES *resultado = mysql_store_result(conexao);
 
-    if (resultado == NULL) {
+    if (resultado == NULL)
+    {
         printf("Erro ao obter resultados: %s\n",
                mysql_error(conexao));
         return;
@@ -832,7 +884,8 @@ void Consultar_Classificacao_Banco(MYSQL *conexao, int id_campeonato) {
 
     printf("\n========== CLASSIFICACAO DO CAMPEONATO ==========\n");
 
-    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+    while ((linha = mysql_fetch_row(resultado)) != NULL)
+    {
 
         printf("\nID da classificacao: %s\n", linha[0]);
         printf("Pontuacao: %s\n", linha[1]);
@@ -844,9 +897,8 @@ void Consultar_Classificacao_Banco(MYSQL *conexao, int id_campeonato) {
     mysql_free_result(resultado);
 }
 
-
-
-int Atualizar_Nome_Equipe_Banco(MYSQL *conexao) {
+int Atualizar_Nome_Equipe_Banco(MYSQL *conexao)
+{
 
     int id_equipe;
     char novo_nome[51];
@@ -861,7 +913,8 @@ int Atualizar_Nome_Equipe_Banco(MYSQL *conexao) {
 
     MYSQL_STMT *stmt = mysql_stmt_init(conexao);
 
-    if (stmt == NULL) {
+    if (stmt == NULL)
+    {
         printf("Erro ao iniciar comando SQL.\n");
         return 0;
     }
@@ -869,7 +922,8 @@ int Atualizar_Nome_Equipe_Banco(MYSQL *conexao) {
     const char *sql =
         "UPDATE equipes SET nome_equipe = ? WHERE ID_equipe = ?";
 
-    if (mysql_stmt_prepare(stmt, sql, strlen(sql))) {
+    if (mysql_stmt_prepare(stmt, sql, strlen(sql)))
+    {
         printf("Erro ao preparar SQL: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
@@ -889,23 +943,28 @@ int Atualizar_Nome_Equipe_Banco(MYSQL *conexao) {
     parametros[1].buffer_type = MYSQL_TYPE_LONG;
     parametros[1].buffer = &id_equipe;
 
-    if (mysql_stmt_bind_param(stmt, parametros)) {
+    if (mysql_stmt_bind_param(stmt, parametros))
+    {
         printf("Erro ao associar dados: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return 0;
     }
 
-    if (mysql_stmt_execute(stmt)) {
+    if (mysql_stmt_execute(stmt))
+    {
         printf("Erro ao atualizar equipe: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return 0;
     }
 
-    if (mysql_stmt_affected_rows(stmt) == 0) {
+    if (mysql_stmt_affected_rows(stmt) == 0)
+    {
         printf("Nenhuma equipe foi alterada. Verifique o ID.\n");
-    } else {
+    }
+    else
+    {
         printf("Nome da equipe atualizado com sucesso!\n");
     }
 
@@ -914,7 +973,8 @@ int Atualizar_Nome_Equipe_Banco(MYSQL *conexao) {
     return 1;
 }
 
-int Excluir_Jogador_Banco(MYSQL *conexao) {
+int Excluir_Jogador_Banco(MYSQL *conexao)
+{
 
     int id_jogador;
 
@@ -924,7 +984,8 @@ int Excluir_Jogador_Banco(MYSQL *conexao) {
 
     MYSQL_STMT *stmt = mysql_stmt_init(conexao);
 
-    if (stmt == NULL) {
+    if (stmt == NULL)
+    {
         printf("Erro ao iniciar comando SQL.\n");
         return 0;
     }
@@ -932,7 +993,8 @@ int Excluir_Jogador_Banco(MYSQL *conexao) {
     const char *sql =
         "DELETE FROM jogadores WHERE ID_jogador = ?";
 
-    if (mysql_stmt_prepare(stmt, sql, strlen(sql))) {
+    if (mysql_stmt_prepare(stmt, sql, strlen(sql)))
+    {
         printf("Erro ao preparar SQL: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
@@ -945,23 +1007,28 @@ int Excluir_Jogador_Banco(MYSQL *conexao) {
     parametro.buffer_type = MYSQL_TYPE_LONG;
     parametro.buffer = &id_jogador;
 
-    if (mysql_stmt_bind_param(stmt, &parametro)) {
+    if (mysql_stmt_bind_param(stmt, &parametro))
+    {
         printf("Erro ao associar parametro: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return 0;
     }
 
-    if (mysql_stmt_execute(stmt)) {
+    if (mysql_stmt_execute(stmt))
+    {
         printf("Erro ao excluir jogador: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         return 0;
     }
 
-    if (mysql_stmt_affected_rows(stmt) > 0) {
+    if (mysql_stmt_affected_rows(stmt) > 0)
+    {
         printf("Jogador excluido com sucesso!\n");
-    } else {
+    }
+    else
+    {
         printf("Nenhum jogador encontrado com esse ID.\n");
     }
 
@@ -970,11 +1037,12 @@ int Excluir_Jogador_Banco(MYSQL *conexao) {
     return 1;
 }
 
-
-int Atualizar_Classificacao_Banco(MYSQL *conexao, int id_campeonato) {
+int Atualizar_Classificacao_Banco(MYSQL *conexao, int id_campeonato)
+{
 
     // Inicia uma transacao
-    if (mysql_query(conexao, "START TRANSACTION")) {
+    if (mysql_query(conexao, "START TRANSACTION"))
+    {
         printf("Erro ao iniciar transacao: %s\n",
                mysql_error(conexao));
         return 0;
@@ -988,12 +1056,14 @@ int Atualizar_Classificacao_Banco(MYSQL *conexao, int id_campeonato) {
 
     MYSQL_STMT *stmt = mysql_stmt_init(conexao);
 
-    if (stmt == NULL) {
+    if (stmt == NULL)
+    {
         mysql_query(conexao, "ROLLBACK");
         return 0;
     }
 
-    if (mysql_stmt_prepare(stmt, sql_delete, strlen(sql_delete))) {
+    if (mysql_stmt_prepare(stmt, sql_delete, strlen(sql_delete)))
+    {
         printf("Erro ao preparar exclusao: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
@@ -1008,7 +1078,8 @@ int Atualizar_Classificacao_Banco(MYSQL *conexao, int id_campeonato) {
     parametro.buffer = &id_campeonato;
 
     if (mysql_stmt_bind_param(stmt, &parametro) ||
-        mysql_stmt_execute(stmt)) {
+        mysql_stmt_execute(stmt))
+    {
 
         printf("Erro ao limpar classificacao: %s\n",
                mysql_stmt_error(stmt));
@@ -1046,12 +1117,14 @@ int Atualizar_Classificacao_Banco(MYSQL *conexao, int id_campeonato) {
 
     stmt = mysql_stmt_init(conexao);
 
-    if (stmt == NULL) {
+    if (stmt == NULL)
+    {
         mysql_query(conexao, "ROLLBACK");
         return 0;
     }
 
-    if (mysql_stmt_prepare(stmt, sql_insert, strlen(sql_insert))) {
+    if (mysql_stmt_prepare(stmt, sql_insert, strlen(sql_insert)))
+    {
         printf("Erro ao preparar recalculo: %s\n",
                mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
@@ -1065,7 +1138,8 @@ int Atualizar_Classificacao_Banco(MYSQL *conexao, int id_campeonato) {
     parametro.buffer = &id_campeonato;
 
     if (mysql_stmt_bind_param(stmt, &parametro) ||
-        mysql_stmt_execute(stmt)) {
+        mysql_stmt_execute(stmt))
+    {
 
         printf("Erro ao recalcular classificacao: %s\n",
                mysql_stmt_error(stmt));
@@ -1078,7 +1152,8 @@ int Atualizar_Classificacao_Banco(MYSQL *conexao, int id_campeonato) {
     mysql_stmt_close(stmt);
 
     // Confirma as alteracoes
-    if (mysql_query(conexao, "COMMIT")) {
+    if (mysql_query(conexao, "COMMIT"))
+    {
         printf("Erro ao confirmar classificacao: %s\n",
                mysql_error(conexao));
         mysql_query(conexao, "ROLLBACK");
@@ -1090,23 +1165,22 @@ int Atualizar_Classificacao_Banco(MYSQL *conexao, int id_campeonato) {
     return 1;
 }
 
-
 int Carregar_Equipes_Banco(
     MYSQL *conexao,
     Equipe equipes[],
-    int id_campeonato
-) {
+    int id_campeonato)
+{
     char sql[300];
 
     snprintf(sql, sizeof(sql),
-        "SELECT ID_equipe, nome_equipe, qntd_membros, ID_campeonato "
-        "FROM equipes "
-        "WHERE ID_campeonato = %d "
-        "ORDER BY ID_equipe ASC",
-        id_campeonato
-    );
+             "SELECT ID_equipe, nome_equipe, qntd_membros, ID_campeonato "
+             "FROM equipes "
+             "WHERE ID_campeonato = %d "
+             "ORDER BY ID_equipe ASC",
+             id_campeonato);
 
-    if (mysql_query(conexao, sql)) {
+    if (mysql_query(conexao, sql))
+    {
         printf("Erro ao carregar equipes: %s\n",
                mysql_error(conexao));
         return -1;
@@ -1114,7 +1188,8 @@ int Carregar_Equipes_Banco(
 
     MYSQL_RES *resultado = mysql_store_result(conexao);
 
-    if (resultado == NULL) {
+    if (resultado == NULL)
+    {
         printf("Erro ao obter equipes: %s\n",
                mysql_error(conexao));
         return -1;
@@ -1123,9 +1198,11 @@ int Carregar_Equipes_Banco(
     MYSQL_ROW linha;
     int quantidade = 0;
 
-    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+    while ((linha = mysql_fetch_row(resultado)) != NULL)
+    {
 
-        if (quantidade >= 100) {
+        if (quantidade >= 100)
+        {
             printf("Limite de equipes atingido.\n");
             break;
         }
@@ -1148,21 +1225,21 @@ int Carregar_Equipes_Banco(
 int Carregar_Jogadores_Banco(
     MYSQL *conexao,
     Jogador jogadores[],
-    int id_campeonato
-) {
+    int id_campeonato)
+{
     char sql[300];
 
     snprintf(sql, sizeof(sql),
-        "SELECT j.ID_jogador, j.nome_jogador, j.idade, "
-        "j.email, j.telefone, j.ID_equipe "
-        "FROM jogadores j "
-        "INNER JOIN equipes e ON j.ID_equipe = e.ID_equipe "
-        "WHERE e.ID_campeonato = %d "
-        "ORDER BY j.ID_jogador ASC",
-        id_campeonato
-    );
+             "SELECT j.ID_jogador, j.nome_jogador, j.idade, "
+             "j.email, j.telefone, j.ID_equipe "
+             "FROM jogadores j "
+             "INNER JOIN equipes e ON j.ID_equipe = e.ID_equipe "
+             "WHERE e.ID_campeonato = %d "
+             "ORDER BY j.ID_jogador ASC",
+             id_campeonato);
 
-    if (mysql_query(conexao, sql)) {
+    if (mysql_query(conexao, sql))
+    {
         printf("Erro ao carregar jogadores: %s\n",
                mysql_error(conexao));
         return -1;
@@ -1170,7 +1247,8 @@ int Carregar_Jogadores_Banco(
 
     MYSQL_RES *resultado = mysql_store_result(conexao);
 
-    if (resultado == NULL) {
+    if (resultado == NULL)
+    {
         printf("Erro ao obter jogadores: %s\n",
                mysql_error(conexao));
         return -1;
@@ -1179,9 +1257,11 @@ int Carregar_Jogadores_Banco(
     MYSQL_ROW linha;
     int quantidade = 0;
 
-    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+    while ((linha = mysql_fetch_row(resultado)) != NULL)
+    {
 
-        if (quantidade >= 500) {
+        if (quantidade >= 500)
+        {
             printf("Limite de jogadores atingido.\n");
             break;
         }
@@ -1203,28 +1283,27 @@ int Carregar_Jogadores_Banco(
     return quantidade;
 }
 
-
 int Carregar_Partidas_Banco(
     MYSQL *conexao,
     Partida partidas[],
-    int id_campeonato
-) {
+    int id_campeonato)
+{
     char sql[500];
 
     snprintf(sql, sizeof(sql),
-        "SELECT p.ID_partida, p.data_partida, p.horario, "
-        "p.tempo_duracao, p.equipe_1, p.equipe_2 "
-        "FROM partidas p "
-        "INNER JOIN equipes e1 ON p.equipe_1 = e1.ID_equipe "
-        "INNER JOIN equipes e2 ON p.equipe_2 = e2.ID_equipe "
-        "WHERE e1.ID_campeonato = %d "
-        "AND e2.ID_campeonato = %d "
-        "ORDER BY p.ID_partida ASC",
-        id_campeonato,
-        id_campeonato
-    );
+             "SELECT p.ID_partida, p.data_partida, p.horario, "
+             "p.tempo_duracao, p.equipe_1, p.equipe_2 "
+             "FROM partidas p "
+             "INNER JOIN equipes e1 ON p.equipe_1 = e1.ID_equipe "
+             "INNER JOIN equipes e2 ON p.equipe_2 = e2.ID_equipe "
+             "WHERE e1.ID_campeonato = %d "
+             "AND e2.ID_campeonato = %d "
+             "ORDER BY p.ID_partida ASC",
+             id_campeonato,
+             id_campeonato);
 
-    if (mysql_query(conexao, sql)) {
+    if (mysql_query(conexao, sql))
+    {
         printf("Erro ao carregar partidas: %s\n",
                mysql_error(conexao));
         return -1;
@@ -1232,7 +1311,8 @@ int Carregar_Partidas_Banco(
 
     MYSQL_RES *resultado = mysql_store_result(conexao);
 
-    if (resultado == NULL) {
+    if (resultado == NULL)
+    {
         printf("Erro ao obter partidas: %s\n",
                mysql_error(conexao));
         return -1;
@@ -1241,9 +1321,11 @@ int Carregar_Partidas_Banco(
     MYSQL_ROW linha;
     int quantidade = 0;
 
-    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+    while ((linha = mysql_fetch_row(resultado)) != NULL)
+    {
 
-        if (quantidade >= 100) {
+        if (quantidade >= 100)
+        {
             printf("Limite de partidas atingido.\n");
             break;
         }
@@ -1268,25 +1350,25 @@ int Carregar_Partidas_Banco(
 int Carregar_Resultados_Banco(
     MYSQL *conexao,
     ResultadoPartida resultados[],
-    int id_campeonato
-) {
+    int id_campeonato)
+{
     char sql[500];
 
     snprintf(sql, sizeof(sql),
-        "SELECT rp.ID_resultado, rp.equipe_venc, "
-        "rp.pont_eq1, rp.pont_eq2, rp.ID_partida "
-        "FROM resultado_partida rp "
-        "INNER JOIN partidas p ON rp.ID_partida = p.ID_partida "
-        "INNER JOIN equipes e1 ON p.equipe_1 = e1.ID_equipe "
-        "INNER JOIN equipes e2 ON p.equipe_2 = e2.ID_equipe "
-        "WHERE e1.ID_campeonato = %d "
-        "AND e2.ID_campeonato = %d "
-        "ORDER BY rp.ID_resultado ASC",
-        id_campeonato,
-        id_campeonato
-    );
+             "SELECT rp.ID_resultado, rp.equipe_venc, "
+             "rp.pont_eq1, rp.pont_eq2, rp.ID_partida "
+             "FROM resultado_partida rp "
+             "INNER JOIN partidas p ON rp.ID_partida = p.ID_partida "
+             "INNER JOIN equipes e1 ON p.equipe_1 = e1.ID_equipe "
+             "INNER JOIN equipes e2 ON p.equipe_2 = e2.ID_equipe "
+             "WHERE e1.ID_campeonato = %d "
+             "AND e2.ID_campeonato = %d "
+             "ORDER BY rp.ID_resultado ASC",
+             id_campeonato,
+             id_campeonato);
 
-    if (mysql_query(conexao, sql)) {
+    if (mysql_query(conexao, sql))
+    {
         printf("Erro ao carregar resultados: %s\n",
                mysql_error(conexao));
         return -1;
@@ -1294,7 +1376,8 @@ int Carregar_Resultados_Banco(
 
     MYSQL_RES *resultado = mysql_store_result(conexao);
 
-    if (resultado == NULL) {
+    if (resultado == NULL)
+    {
         printf("Erro ao obter resultados: %s\n",
                mysql_error(conexao));
         return -1;
@@ -1303,9 +1386,11 @@ int Carregar_Resultados_Banco(
     MYSQL_ROW linha;
     int quantidade = 0;
 
-    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+    while ((linha = mysql_fetch_row(resultado)) != NULL)
+    {
 
-        if (quantidade >= 100) {
+        if (quantidade >= 100)
+        {
             printf("Limite de resultados atingido.\n");
             break;
         }
@@ -1330,23 +1415,24 @@ int Carregar_Resultados_Banco(
     return quantidade;
 }
 
-
 int Carregar_Classificacao_Banco(MYSQL *conexao,
                                  Classificacao classificacao[],
-                                 int id_campeonato) {
+                                 int id_campeonato)
+{
 
     char sql[300];
 
     snprintf(sql, sizeof(sql),
-        "SELECT c.ID_classificacao, c.pontuacao, "
-        "c.posicao, c.ID_equipe "
-        "FROM classificacao c "
-        "INNER JOIN equipes e ON c.ID_equipe = e.ID_equipe "
-        "WHERE e.ID_campeonato = %d "
-        "ORDER BY c.posicao ASC",
-        id_campeonato);
+             "SELECT c.ID_classificacao, c.pontuacao, "
+             "c.posicao, c.ID_equipe "
+             "FROM classificacao c "
+             "INNER JOIN equipes e ON c.ID_equipe = e.ID_equipe "
+             "WHERE e.ID_campeonato = %d "
+             "ORDER BY c.posicao ASC",
+             id_campeonato);
 
-    if (mysql_query(conexao, sql)) {
+    if (mysql_query(conexao, sql))
+    {
         printf("Erro ao carregar classificacao: %s\n",
                mysql_error(conexao));
         return -1;
@@ -1354,7 +1440,8 @@ int Carregar_Classificacao_Banco(MYSQL *conexao,
 
     MYSQL_RES *resultado = mysql_store_result(conexao);
 
-    if (resultado == NULL) {
+    if (resultado == NULL)
+    {
         printf("Erro ao obter classificacao: %s\n",
                mysql_error(conexao));
         return -1;
@@ -1363,9 +1450,11 @@ int Carregar_Classificacao_Banco(MYSQL *conexao,
     MYSQL_ROW linha;
     int quantidade = 0;
 
-    while ((linha = mysql_fetch_row(resultado)) != NULL) {
+    while ((linha = mysql_fetch_row(resultado)) != NULL)
+    {
 
-        if (quantidade >= 100) {
+        if (quantidade >= 100)
+        {
             printf("Limite de classificacao atingido.\n");
             break;
         }
@@ -1386,4 +1475,106 @@ int Carregar_Classificacao_Banco(MYSQL *conexao,
     printf("\n%d classificacoes recuperadas do MySQL!\n", quantidade);
 
     return quantidade;
+}
+
+int nome_equipe_existe(MYSQL *conexao, const char *nome_equipe)
+{
+    const char *sql = "SELECT 1 FROM equipes WHERE nome_equipe = ? LIMIT 1";
+    MYSQL_STMT *stmt = mysql_stmt_init(conexao);
+    if (!stmt)
+        return -1;
+
+    if (mysql_stmt_prepare(stmt, sql, strlen(sql)) != 0)
+    {
+        fprintf(stderr, "Erro no prepare: %s\n", mysql_stmt_error(stmt));
+        mysql_stmt_close(stmt);
+        return -1;
+    }
+
+    unsigned long tam = strlen(nome_equipe);
+    MYSQL_BIND bind[1];
+    memset(bind, 0, sizeof(bind));
+    bind[0].buffer_type = MYSQL_TYPE_STRING;
+    bind[0].buffer = (char *)nome_equipe;
+    bind[0].buffer_lenght = tam;
+    bind[0].lenght = &tam;
+
+    if (mysql_stmt_bind_param(stmt, bind) != 0 || mysql_stmt_execuete(stmt) != 0 || mysql_stmt_store_result(stmt) != 0)
+    {
+        fprintf(stderr, "Erro na consulta: %s\n", mysql_stmt_error(stmt));
+        mysql_stmt_close(stmt);
+        return -1;
+    }
+
+    int existe = (mysql_stmt_num_rows(stmt) > 0);
+    mysql_stmt_close(stmt);
+    return existe;
+}
+
+int email_jogador_existe(MYSQL *conexao, const char *email)
+{
+    const char *sql = "SELECT 1 FROM jogadores WHERE email = ? LIMIT 1";
+    MYSQL_STMT *stmt = mysql_stmt_init(conexao);
+    if (!stmt)
+        return -1;
+
+    if (mysql_stmt_prepare(stmt, sql, strlen(sql)) != 0)
+    {
+        fprintf(stderr, "Erro no prepare: %s\n", mysql_stmt_error(stmt));
+        mysql_stmt_close(stmt);
+        return -1;
+    }
+
+    unsigned long tam = strlen(email);
+    MYSQL_BIND bind[1];
+    memset(bind, 0, sizeof(bind));
+    bind[0].buffer_type = MYSQL_TYPE_STRING;
+    bind[0].buffer = (char *)email;
+    bind[0].buffer_lenght = tam;
+    bind[0].lenght = &tam;
+
+    if (mysql_stmt_bind_param(stmt, bind) != 0 || mysql_stmt_execuete(stmt) != 0 || mysql_stmt_store_result(stmt) != 0)
+    {
+        fprintf(stderr, "Erro na consulta: %s\n", mysql_stmt_error(stmt));
+        mysql_stmt_close(stmt);
+        return -1;
+    }
+
+    int existe = (mysql_stmt_num_rows(stmt) > 0);
+    mysql_stmt_close(stmt);
+    return existe;
+}
+
+int telefone_jogador_existe(MYSQL *conexao, const char *telefone)
+{
+    const char *sql = "SELECT 1 FROM jogadores WHERE telefone = ? LIMIT 1";
+    MYSQL_STMT *stmt = mysql_stmt_init(conexao);
+    if (!stmt)
+        return -1;
+
+    if (mysql_stmt_prepare(stmt, sql, strlen(sql)) != 0)
+    {
+        fprintf(stderr, "Erro no prepare: %s\n", mysql_stmt_error(stmt));
+        mysql_stmt_close(stmt);
+        return -1;
+    }
+
+    unsigned long tam = strlen(telefone);
+    MYSQL_BIND bind[1];
+    memset(bind, 0, sizeof(bind));
+    bind[0].buffer_type = MYSQL_TYPE_STRING;
+    bind[0].buffer = (char *)telefone;
+    bind[0].buffer_lenght = tam;
+    bind[0].lenght = &tam;
+
+    if (mysql_stmt_bind_param(stmt, bind) != 0 || mysql_stmt_execuete(stmt) != 0 || mysql_stmt_store_result(stmt) != 0)
+    {
+        fprintf(stderr, "Erro na consulta: %s\n", mysql_stmt_error(stmt));
+        mysql_stmt_close(stmt);
+        return -1;
+    }
+
+    int existe = (mysql_stmt_num_rows(stmt) > 0);
+    mysql_stmt_close(stmt);
+    return existe;
 }

@@ -144,8 +144,7 @@ int main(void)
     }
 
     if (opcao == 1)
-{
-
+    {
         Campeonato campeonatos[50];
         Equipe equipes[100];
         Jogador jogadores[500];
@@ -170,24 +169,80 @@ int main(void)
         int id_busca;
         char nome_busca[51];
 
+        int retorno, c, existe;
+
         // CADASTRO DO CAMPEONATO
 
         printf("========== CAMPEONATO ==========\n");
 
-        printf("Nome: ");
-        scanf(" %100[^\n]", novo_campeonato.nome);
+        do
+        {
+            printf("Nome: ");
+            retorno = scanf("%100[^\n]", novo_campeonato.nome);
+            while ((c = getchar()) != '\n' && c != EOF)
+            {
+                // descarta o resto da linha (inclusive o '\n')
+            }
+            if (retorno == EOF)
+                return 1;
+            if (retorno != 1)
+                printf("Nome do campeonato não pode ser vazio.\n");
+        } while (retorno != 1);
 
-        printf("Jogo: ");
-        scanf(" %50[^\n]", novo_campeonato.jogo);
+        do
+        {
+            printf("Jogo: ");
+            retorno = scanf("%50[^\n]", novo_campeonato.jogo);
+            while ((c = getchar()) != '\n' && c != EOF)
+            {
+                // descarta o resto da linha (inclusive o '\n')
+            }
+            if (retorno == EOF)
+                return 1;
+            if (retorno != 1)
+                printf("Jogo do campeonato não pode ser vazio.\n");
+        } while (retorno != 1);
 
         printf("Data de inicio (AAAA-MM-DD): ");
         scanf("%10s", novo_campeonato.data_inicio);
 
-        printf("Tempo de duracao: ");
-        scanf(" %20[^\n]", novo_campeonato.tempo_duracao);
+        do
+        {
+            printf("Data de inicio (AAAA-MM-DD): ");
+            retorno = scanf("%10s", novo_campeonato.data_inicio);
+            while ((c = getchar()) != '\n' && c != EOF)
+            {
+                // descarta o resto da linha (inclusive o '\n')
+            }
+            if (retorno == EOF)
+                return 1;
+            if (retorno != 1)
+                printf("Data de inicio do campeonato não pode ser vazia.\n");
+        } while (retorno != 1);
 
-        printf("Quantidade de equipes: ");
-        scanf("%d", &novo_campeonato.num_equipes);
+        do
+        {
+            printf("Tempo de duracao: ");
+            retorno = scanf("%20[^\n]", novo_campeonato.tempo_duracao);
+            while ((c = getchar()) != '\n' && c != EOF)
+            {
+                // descarta o resto da linha (inclusive o '\n')
+            }
+            if (retorno == EOF)
+                return 1;
+            if (retorno != 1)
+                printf("Tempo de duracao do campeonato não pode ser vazio.\n");
+        } while (retorno != 1);
+
+        do
+        {
+            printf("Quantidade de equipes: ");
+            scanf("%d", &novo_campeonato.num_equipes);
+            if (novo_campeonato.num_equipes <= 1)
+            {
+                printf("A quantidade de equipes deve ser pelo menos 2.\n");
+            }
+        } while (novo_campeonato.num_equipes <= 1);
 
         if (!Cadastrar_Campeonato(
                 campeonatos,
@@ -219,11 +274,41 @@ int main(void)
 
             printf("\n========== EQUIPE %d ==========\n", i + 1);
 
-            printf("Nome da equipe: ");
-            scanf(" %50[^\n]", nova_equipe.nome_equipe);
+            do
+            {
+                existe = 0;
+                printf("Nome da equipe: ");
+                retorno = scanf("%50[^\n]", nova_equipe.nome_equipe);
+                while ((c = getchar()) != '\n' && c != EOF)
+                {
+                    // descarta o resto da linha (inclusive o '\n')
+                }
+                if (retorno == EOF)
+                    return 1;
+                if (retorno != 1)
+                    printf("Nome da equipe nao pode ser vazio.\n");
 
-            printf("Quantidade de membros: ");
-            scanf("%d", &nova_equipe.qntd_membros);
+                existe = nome_equipe_existe(conexao, nova_equipe.nome_equipe);
+                if (existe == -1)
+                {
+                    printf("Erro ao consultar o banco.\n");
+                    Desconectar_Banco(conexao);
+                    return 1;
+                }
+                if (existe == 1)
+                {
+                    printf("Já existe uma equipe com esse nome. Digite outro nome.\n");
+                }
+            } while (retorno != 1 || existe);
+
+            do{
+                printf("Quantidade de membros: ");
+                scanf("%d", &nova_equipe.qntd_membros);
+                if (nova_equipe.qntd_membros <= 0){
+                    printf("A quantidade de membros deve ser maior que 0.\n");
+                }
+            } while (nova_equipe.qntd_membros <= 0);
+
 
             if (Cadastrar_Equipe(
                     equipes,
@@ -325,15 +410,13 @@ int main(void)
 
         printf("\n========== PARTIDAS ==========\n");
 
-        printf("Quantidade de partidas: ");
-        scanf("%d", &quantidade_partidas);
-
-        if (quantidade_partidas < 1 ||
-            quantidade_partidas > 100)
-        {
-            printf("Quantidade de partidas invalida.\n");
-            return 1;
-        }
+        do{
+                printf("Quantidade de partidas: ");
+                scanf("%d", &quantidade_partidas);
+                if (quantidade_partidas < 1 || quantidade_partidas > 100){
+                    printf("Quantidade de partidas invalida.\n");
+                }
+            } while (quantidade_partidas < 1 || quantidade_partidas > 100);
 
         for (int i = 0; i < quantidade_partidas; i++)
         {
