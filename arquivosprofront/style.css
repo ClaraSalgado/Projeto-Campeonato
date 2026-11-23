@@ -1,0 +1,340 @@
+:root {
+  --fundo: #070707;
+  --card: #121212;
+  --card-claro: #1a1a1a;
+  --borda: #2a2a2a;
+  --vermelho: #e11d2e;
+  --vermelho-claro: #ff4d5e;
+  --branco: #ffffff;
+  --texto: #f2f2f2;
+  --texto-suave: #8f8f8f;
+  --erro: #ff4d4d;
+  --sucesso: #3ee0a0;
+  --brilho: 0 0 24px rgba(225, 29, 46, 0.45);   /* brilho vermelho neon */
+}
+
+/* ---------- 2. BASE ---------- */
+* { box-sizing: border-box; margin: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  color: var(--texto);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  /* Fundo */
+  background:
+    radial-gradient(800px 420px at 80% -5%, rgba(225, 29, 46, 0.22), transparent 70%),
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px) 0 0 / 40px 40px,
+    var(--fundo);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+h1, h2, .marca, .titulo-grande { font-family: "Chakra Petch", system-ui, sans-serif; }
+h1 { font-size: 28px; line-height: 1.1; }
+h2 { font-size: 17px; margin-bottom: 14px; color: var(--branco); }
+.dica { font-size: 14px; color: var(--texto-suave); }
+
+/* ---------- 3. MENU LATERAL ---------- */
+.sidebar {
+  position: fixed;
+  top: 0; bottom: 0; left: 0;
+  width: 240px;
+  padding: 24px 14px;
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid var(--borda);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  z-index: 30;
+}
+.marca {
+  font-size: 28px;
+  font-weight: 700;
+  padding-left: 12px;
+  border-left: 4px solid var(--vermelho);      /* barrinha vermelha ao lado do nome */
+  text-shadow: 0 0 16px var(--vermelho);
+}
+.sidebar nav { display: flex; flex-direction: column; gap: 4px; }
+.sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  color: var(--texto-suave);
+  text-decoration: none;
+  border-radius: 10px;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+.sidebar a:hover { background: var(--card-claro); color: var(--branco); transform: translateX(3px); }
+.sidebar a.ativo {
+  background: linear-gradient(90deg, rgba(225, 29, 46, 0.3), transparent);
+  color: var(--branco);
+  box-shadow: inset 3px 0 0 var(--vermelho);
+}
+.sidebar a.ativo svg { color: var(--vermelho-claro); }
+
+/* Ícones do menu (desenhados com traço, herdam a cor do texto) */
+.sidebar svg {
+  width: 20px; height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.aviso { margin-top: auto; font-size: 12px; color: var(--texto-suave); }
+
+/* Fundo escuro atrás do menu (só no celular/tablet) */
+#fundo-menu { display: none; }
+
+/* ---------- 4. ÁREA PRINCIPAL ---------- */
+main { margin-left: 240px; padding: 0 28px 40px; max-width: 1240px; }
+
+.topo {
+  position: sticky;            /* fica grudado no topo ao rolar */
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 0;
+  margin-bottom: 8px;
+  background: linear-gradient(var(--fundo) 60%, transparent);
+}
+#botao-menu { display: none; }
+
+/* Só a página escolhida aparece, entrando com um leve deslize */
+.pagina { display: none; flex-direction: column; gap: 18px; }
+.pagina.ativa { display: flex; animation: entrar 0.35s ease; }
+@keyframes entrar {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- 5. CARDS ---------- */
+.card {
+  background: linear-gradient(180deg, var(--card-claro), var(--card));
+  border: 1px solid var(--borda);
+  border-radius: 16px;
+  padding: 22px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.card:hover { border-color: rgba(225, 29, 46, 0.5); }
+.duas-colunas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+
+/* ---------- 6. DASHBOARD ---------- */
+.destaque {
+  position: relative;
+  overflow: hidden;
+  padding: 34px;
+  border-radius: 18px;
+  border: 1px solid var(--vermelho);
+  background:
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 14px),   /* listras */
+    linear-gradient(120deg, #7a0c18, #1a0407 75%);
+  box-shadow: var(--brilho);
+}
+.destaque .titulo-grande { position: relative; font-size: 38px; font-weight: 700; line-height: 1.1; }
+.destaque p { position: relative; margin-top: 10px; color: #e6c4c8; }
+.destaque span { color: var(--branco); font-weight: 600; }
+
+/* Passo a passo */
+.passos { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.passo {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  color: var(--texto);
+  text-decoration: none;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.passo:hover { transform: translateY(-3px); border-color: var(--branco); }
+.passo i {                           /* bolinha com o número do passo */
+  display: grid; place-items: center;
+  width: 28px; height: 28px; margin-bottom: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--texto-suave);
+  font-style: normal; font-size: 13px; color: var(--texto-suave);
+}
+.passo small { color: var(--texto-suave); }
+.passo.feito i { background: var(--vermelho); border-color: var(--vermelho); color: transparent; position: relative; }
+.passo.feito i::after { content: "✓"; position: absolute; color: #fff; font-size: 14px; }
+.passo.atual { border-color: var(--vermelho); animation: pulsar 2s infinite; }   /* chama atenção para o próximo passo */
+.passo.atual i { border-color: var(--vermelho); color: var(--branco); }
+@keyframes pulsar {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(225, 29, 46, 0.5); }
+  50% { box-shadow: 0 0 0 7px rgba(225, 29, 46, 0); }
+}
+
+/* Quadros de números */
+.numeros { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
+.numero {
+  padding: 18px;
+  background: var(--card);
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.numero:hover { transform: translateY(-3px); border-color: var(--vermelho); }
+.numero b { display: block; font-family: "Chakra Petch", sans-serif; font-size: 34px; line-height: 1.1; }
+.numero small { color: var(--texto-suave); }
+
+/* Barras de limite */
+.limite { margin-bottom: 14px; font-size: 14px; color: var(--texto-suave); }
+.limite div:first-child { display: flex; justify-content: space-between; margin-bottom: 5px; }
+.barra { height: 8px; background: #000; border-radius: 8px; overflow: hidden; }
+.barra i { display: block; height: 100%; background: linear-gradient(90deg, var(--vermelho), var(--vermelho-claro)); border-radius: 8px; transition: width 0.6s; }
+
+/* ---------- 7. FORMULÁRIOS ---------- */
+.formulario {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+.formulario h2, .formulario .dica { grid-column: 1 / -1; margin: 0; }
+
+label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--texto-suave); }
+input, select {
+  width: 100%;
+  padding: 11px 13px;
+  background: #0a0a0a;
+  color: var(--texto);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  font-size: 15px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:hover, select:hover { border-color: #444; }
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--vermelho);
+  box-shadow: 0 0 0 3px rgba(225, 29, 46, 0.3);
+}
+input:user-invalid { border-color: var(--erro); }   /* campo errado fica vermelho */
+input[type=date], input[type=time] { color-scheme: dark; }
+
+.botao {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, var(--vermelho-claro), var(--vermelho));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--brilho);
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+.botao:hover { transform: translateY(-2px); box-shadow: 0 0 32px rgba(225, 29, 46, 0.7); }
+.botao:active { transform: scale(0.97); }
+.botao.contorno { background: transparent; border: 1px solid var(--branco); box-shadow: none; }
+.botao.contorno:hover { background: var(--branco); color: #000; }
+button:focus-visible, .sidebar a:focus-visible, .passo:focus-visible { outline: 2px solid var(--branco); outline-offset: 2px; }
+
+/* Botões pequenos dentro das tabelas (Acessar, Excluir) */
+.botao.mini { width: auto; padding: 6px 14px; font-size: 13px; box-shadow: none; }
+.botao.mini:hover { box-shadow: var(--brilho); }
+.botao.mini.perigo { background: transparent; border: 1px solid var(--erro); color: var(--erro); }
+.botao.mini.perigo:hover { background: var(--erro); color: #000; box-shadow: none; }
+
+/* Campeonato em uso (canto direito do topo) */
+.campeonato-ativo { margin-left: auto; width: 280px; max-width: 100%; }
+.campeonato-ativo select { padding: 8px 12px; font-size: 14px; }
+
+/* ---------- 8. TABELAS ---------- */
+.tabela-area { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 520px; }
+th { text-align: left; font-weight: 500; font-size: 13px; color: var(--texto-suave); padding: 10px 14px; border-bottom: 1px solid var(--borda); }
+td { padding: 12px 14px; border-bottom: 1px solid #1f1f1f; }
+tbody tr { transition: background 0.15s; }
+tbody tr:hover { background: rgba(225, 29, 46, 0.1); }
+td.destaque-num { color: var(--vermelho-claro); font-weight: 700; }
+tr.primeiro td { background: rgba(225, 29, 46, 0.18); }
+td.vazio {                          /* "estado vazio": quando não há nada cadastrado */
+  padding: 28px; text-align: center; color: var(--texto-suave);
+  border: 1px dashed var(--borda); border-radius: 12px;
+}
+
+.etiqueta { display: inline-block; padding: 2px 11px; border-radius: 99px; font-size: 13px; border: 1px solid var(--texto-suave); color: var(--texto-suave); }
+.etiqueta.ok { border-color: var(--sucesso); color: var(--sucesso); }
+
+/* ---------- PÓDIO (classificação) ---------- */
+.podio { display: flex; justify-content: center; align-items: flex-end; gap: 12px; }
+.podio:empty { display: none; }
+.podio-item {
+  flex: 1; max-width: 220px;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  padding: 16px 10px;
+  text-align: center;
+  background: var(--card);
+  border: 1px solid var(--borda);
+  border-radius: 14px 14px 0 0;
+  animation: entrar 0.5s ease;
+}
+.podio-item small { color: var(--texto-suave); }
+.podio-item b { font-family: "Chakra Petch", sans-serif; font-size: 18px; word-break: break-word; }
+.podio-item span { color: var(--vermelho-claro); font-weight: 700; }
+.lugar1 { min-height: 170px; border-color: var(--vermelho); background: linear-gradient(180deg, #6b0f18, var(--card)); box-shadow: var(--brilho); }
+.lugar2 { min-height: 130px; }
+.lugar3 { min-height: 100px; }
+
+/* ---------- MENSAGENS ---------- */
+#mensagens { position: fixed; right: 18px; bottom: 18px; display: flex; flex-direction: column; gap: 8px; z-index: 50; }
+.mensagem {
+  background: var(--card-claro);
+  border: 1px solid var(--sucesso);
+  border-left-width: 4px;
+  padding: 13px 18px;
+  border-radius: 10px;
+  max-width: 340px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  animation: deslizar 0.3s ease;
+}
+.mensagem.erro { border-color: var(--erro); }
+@keyframes deslizar { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: none; } }
+
+/* ---------- 9. TABLET (até 1024px): menu vira gaveta ---------- */
+@media (max-width: 1024px) {
+  .sidebar { transform: translateX(-100%); transition: transform 0.25s; box-shadow: 0 0 50px #000; }
+  .sidebar.aberto { transform: none; }
+  #fundo-menu.aberto { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65); z-index: 25; }
+  main { margin-left: 0; padding: 0 20px 40px; }
+  #botao-menu {
+    display: block;
+    background: var(--card-claro); color: var(--texto);
+    border: 1px solid var(--borda); border-radius: 10px;
+    font-size: 22px; padding: 6px 14px; cursor: pointer;
+  }
+  .sidebar a { padding: 14px 12px; }
+}
+
+/* ---------- 10. CELULAR (até 600px) ---------- */
+@media (max-width: 600px) {
+  main { padding: 0 14px 40px; }
+  h1 { font-size: 22px; }
+  .topo { flex-wrap: wrap; }
+  .campeonato-ativo { order: 3; width: 100%; margin-left: 0; }
+  .card { padding: 16px; }
+  .destaque { padding: 22px; }
+  .destaque .titulo-grande { font-size: 26px; }
+  .numeros { grid-template-columns: repeat(2, 1fr); }
+  .passos { grid-template-columns: 1fr 1fr; }
+  .formulario { grid-template-columns: 1fr; }
+  input, select { font-size: 16px; padding: 13px; }   /* 16px evita zoom no iPhone */
+  .botao { width: 100%; padding: 14px; }
+  .podio { gap: 6px; }
+  .podio-item b { font-size: 15px; }
+  #mensagens { left: 14px; right: 14px; }
+  .mensagem { max-width: none; }
+}
+
+/* Quem prefere menos movimento no sistema não vê animações */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

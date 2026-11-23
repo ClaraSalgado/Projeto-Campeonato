@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <!-- Arruma pro tablet e celular -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PROGRAMAURA | Gerenciador de campeonatos de e-sports</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+  <!-- ===== MENU LATERAL =====
+       Cada linha direciona pra uma aba -->
+  <aside class="sidebar" id="sidebar">
+    <div class="marca">Programaura</div>
+    <nav>
+      <a href="#dashboard"><svg viewBox="0 0 24 24"><path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/></svg><span>Dashboard</span></a>
+      <a href="#campeonatos"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/></svg><span>Campeonatos</span></a>
+      <a href="#equipes"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-4 3-6 7-6s7 2 7 6M17 5a3.5 3.5 0 0 1 0 7M22 20c0-3-1.5-5-4-5.8"/></svg><span>Equipes</span></a>
+      <a href="#jogadores"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg><span>Jogadores</span></a>
+      <a href="#partidas"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19M4 8V4h4M20 8V4h-4"/></svg><span>Partidas</span></a>
+      <a href="#resultados"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg><span>Resultados</span></a>
+      <a href="#classificacao"><svg viewBox="0 0 24 24"><path d="M5 21V11M12 21V4M19 21v-7"/></svg><span>Classificação</span></a>
+    </nav>
+    <!-- Mostra se o site está conectado ao servidor.c / MySQL -->
+    <div class="aviso" id="aviso-banco"></div>
+  </aside>
+  <div id="fundo-menu"></div>
+
+  <main>
+    <!-- Topo: botão do menu (só aparece no celular), título da página atual
+         e o campeonato em uso ("Acessar campeonato existente" do main.c) -->
+    <header class="topo">
+      <button id="botao-menu" aria-label="Abrir menu">☰</button>
+      <div><h1 id="titulo">Dashboard</h1><p class="dica" id="subtitulo"></p></div>
+      <label class="campeonato-ativo">Campeonato em uso <select id="select-ativo"></select></label>
+    </header>
+
+    <!-- ===== DASHBOARD =====
+         Tudo aqui é preenchido pelo script.js com os dados do campeonato em uso -->
+    <section id="dashboard" class="pagina">
+      <div class="destaque" id="destaque"></div>
+      <div class="card">
+        <h2>Passo a passo</h2>
+        <div class="passos" id="passos"></div>
+      </div>
+      <div class="numeros" id="numeros"></div>
+      <div class="duas-colunas">
+        <div class="card">
+          <h2>Uso dos limites do programa em C (campeonato em uso)</h2>
+          <div id="limites"></div>
+        </div>
+        <div class="card">
+          <h2>Líder da classificação</h2>
+          <div id="lider"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CAMPEONATOS (struct Campeonato) =====
+         Criar novo campeonato (opção 1 do main.c) e acessar um existente (opção 2) -->
+    <section id="campeonatos" class="pagina">
+      <form class="card formulario" id="form-campeonato">
+        <h2>Criar novo campeonato</h2>
+        <label>Nome <input name="nome" maxlength="100" required></label>
+        <label>Jogo <input name="jogo" maxlength="50" required></label>
+        <label>Data de início <input name="data_inicio" type="date" required></label>
+        <label>Tempo de duração <input name="tempo_duracao" maxlength="20" required></label>
+        <label>Quantidade de equipes <input name="num_equipes" type="number" min="2" max="100" required></label>
+        <button class="botao">Cadastrar campeonato</button>
+      </form>
+      <div class="card">
+        <h2>Campeonatos cadastrados no banco</h2>
+        <div class="tabela-area"><table id="tabela-campeonatos"></table></div>
+      </div>
+    </section>
+
+    <!-- ===== EQUIPES (struct Equipe + Buscar_Equipe_Pelo_Nome + Buscar_Equipe_Pelo_ID + Atualizar_Nome_Equipe_Banco) ===== -->
+    <section id="equipes" class="pagina">
+      <form class="card formulario" id="form-equipe">
+        <h2>Cadastrar equipe</h2>
+        <label>Nome da equipe <input name="nome_equipe" maxlength="50" required></label>
+        <label>Quantidade de membros <input name="qntd_membros" type="number" min="1" max="500" required></label>
+        <button class="botao">Cadastrar equipe</button>
+      </form>
+
+      <form class="card formulario" id="form-busca">
+        <h2>Buscar equipe pelo nome</h2>
+        <label>Nome exato da equipe <input id="busca-nome" maxlength="50" required></label>
+        <button class="botao contorno">Buscar</button>
+        <p class="dica" id="busca-resultado"></p>
+      </form>
+
+      <form class="card formulario" id="form-busca-id">
+        <h2>Buscar equipe pelo ID</h2>
+        <label>ID da equipe <input id="busca-id" type="number" min="1" required></label>
+        <button class="botao contorno">Buscar</button>
+        <p class="dica" id="busca-id-resultado"></p>
+      </form>
+
+      <form class="card formulario" id="form-renomear">
+        <h2>Alterar nome da equipe</h2>
+        <label>Equipe <select name="id_equipe" id="select-equipe-renomear"></select></label>
+        <label>Novo nome <input name="novo_nome" maxlength="50" required></label>
+        <button class="botao">Salvar novo nome</button>
+      </form>
+
+      <div class="card">
+        <h2>Equipes cadastradas</h2>
+        <div class="tabela-area"><table id="tabela-equipes"></table></div>
+      </div>
+    </section>
+
+    <!-- ===== JOGADORES (struct Jogador + Excluir_Jogador_Banco) ===== -->
+    <section id="jogadores" class="pagina">
+      <form class="card formulario" id="form-jogador">
+        <h2>Cadastrar jogador</h2>
+        <label>Equipe <select name="id_equipe" id="select-equipe-jogador"></select></label>
+        <label>Nome <input name="nome_jogador" maxlength="100" required></label>
+        <label>Idade <input name="idade" type="number" min="1" max="120" required></label>
+        <label>Email <input name="email" type="email" maxlength="50" required></label>
+        <label>Telefone <input name="telefone" maxlength="14" required></label>
+        <p class="dica">O e-mail e o telefone não podem repetir os de outro jogador já cadastrado.</p>
+        <button class="botao">Cadastrar jogador</button>
+      </form>
+      <div class="card">
+        <h2>Jogadores cadastrados</h2>
+        <div class="tabela-area"><table id="tabela-jogadores"></table></div>
+      </div>
+    </section>
+
+    <!-- ===== PARTIDAS (struct Partida) ===== -->
+    <section id="partidas" class="pagina">
+      <form class="card formulario" id="form-partida">
+        <h2>Cadastrar partida</h2>
+        <label>Data da partida <input name="data_partida" type="date" required></label>
+        <label>Horário <input name="horario" type="time" required></label>
+        <label>Tempo de duração <input name="tempo_duracao" maxlength="20" required></label>
+        <label>Primeira equipe <select name="equipe_1" id="select-equipe1"></select></label>
+        <label>Segunda equipe <select name="equipe_2" id="select-equipe2"></select></label>
+        <button class="botao">Cadastrar partida</button>
+      </form>
+      <div class="card">
+        <h2>Partidas cadastradas</h2>
+        <div class="tabela-area"><table id="tabela-partidas"></table></div>
+      </div>
+    </section>
+
+    <!-- ===== RESULTADOS (struct ResultadoPartida) ===== -->
+    <section id="resultados" class="pagina">
+      <form class="card formulario" id="form-resultado">
+        <h2>Cadastrar resultado</h2>
+        <label>Partida <select name="id_partida" id="select-partida"></select></label>
+        <label><span id="rotulo-pontos1">Pontos da equipe 1</span> <input name="pont_eq1" type="number" min="0" required></label>
+        <label><span id="rotulo-pontos2">Pontos da equipe 2</span> <input name="pont_eq2" type="number" min="0" required></label>
+        <p class="dica">Na classificação, cada equipe soma os pontos que fez em todas as partidas. A classificação é recalculada a cada resultado cadastrado.</p>
+        <button class="botao">Cadastrar resultado</button>
+      </form>
+      <div class="card">
+        <h2>Resultados cadastrados</h2>
+        <div class="tabela-area"><table id="tabela-resultados"></table></div>
+      </div>
+    </section>
+
+    <!-- ===== CLASSIFICAÇÃO (struct Classificacao + Exibir_Matriz_Resultados) ===== -->
+    <section id="classificacao" class="pagina">
+      <div class="podio" id="podio"></div>
+      <div class="card">
+        <h2>Matriz de resultados</h2>
+        <p class="dica">Pontos de cada equipe em cada partida (na ordem em que as partidas foram cadastradas) e o total.</p>
+        <div class="tabela-area"><table id="tabela-matriz"></table></div>
+      </div>
+      <div class="card">
+        <h2>Classificação final</h2>
+        <div class="tabela-area"><table id="tabela-classificacao"></table></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Área onde aparecem as mensagens de sucesso e erro -->
+  <div id="mensagens"></div>
+
+  <!-- Liga o arquivo de lógica (comportamento) -->
+  <script src="script.js"></script>
+</body>
+</html>
