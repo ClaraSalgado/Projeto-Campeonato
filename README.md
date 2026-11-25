@@ -147,7 +147,7 @@ O programa utiliza vetores com limites máximos definidos:
 
 Projeto acadêmico desenvolvido como atividade de programação em linguagem C, com integração ao banco de dados MySQL.
 
-⁠- Amanda Campos de Souza - RA 10782434
+- Amanda Campos de Souza - RA 10782434
 - Danilo Rasquinho Lima Santos - RA 10782439
 - Maria Clara de Moraes Salgado - RA 10772005
 - Natália Mota Sylvestrin - RA 10771890
