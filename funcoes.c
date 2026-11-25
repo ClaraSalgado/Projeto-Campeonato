@@ -5,7 +5,7 @@
 
 int retorno, c, existe;
 
-// CADASTRAR CAMPEONATO
+
 int Cadastrar_Campeonato(
     Campeonato campeonatos[],
     int quantidade,
@@ -124,7 +124,8 @@ int Buscar_Equipe_Pelo_ID(
 int Cadastrar_Jogadores(
     Jogador jogadores[],
     Equipe equipes[],
-    int qntd_equipes)
+    int qntd_equipes,
+    MYSQL *conexao)
 {
     int total_jogadores = 0;
 
@@ -224,7 +225,6 @@ int Cadastrar_Jogadores(
     return total_jogadores;
 }
 
-// CADASTRAR PARTIDA
 int Cadastrar_Partida(
     Partida partidas[],
     int quantidade,
@@ -296,7 +296,7 @@ int Cadastrar_Partida(
     return 1;
 }
 
-// CADASTRAR RESULTADO
+
 int Cadastrar_Resultado(
     ResultadoPartida resultados[],
     int quantidade_resultados,
@@ -405,8 +405,6 @@ int Cadastrar_Resultado(
         return 0;
     }
 
-    /* Guarda os pontos feitos por cada equipe contra a adversaria.
-       Os indices da matriz correspondem as posicoes no vetor equipes. */
 
     matriz_resultados[indice_equipe1][indice_partida] = pontos1;
 
@@ -428,7 +426,6 @@ int Cadastrar_Resultado(
     return 1;
 }
 
-// SELECTION SORT DA CLASSIFICACAO
 void Ordenar_Classificacao(
     Classificacao classificacao[],
     int quantidade)

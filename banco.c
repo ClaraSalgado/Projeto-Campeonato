@@ -1496,8 +1496,8 @@ int nome_equipe_existe(MYSQL *conexao, const char *nome_equipe)
     memset(bind, 0, sizeof(bind));
     bind[0].buffer_type = MYSQL_TYPE_STRING;
     bind[0].buffer = (char *)nome_equipe;
-    bind[0].buffer_lenght = tam;
-    bind[0].lenght = &tam;
+    bind[0].buffer_length = tam;
+    bind[0].length = &tam;
 
     if (mysql_stmt_bind_param(stmt, bind) != 0 || mysql_stmt_execuete(stmt) != 0 || mysql_stmt_store_result(stmt) != 0)
     {
@@ -1530,8 +1530,8 @@ int email_jogador_existe(MYSQL *conexao, const char *email)
     memset(bind, 0, sizeof(bind));
     bind[0].buffer_type = MYSQL_TYPE_STRING;
     bind[0].buffer = (char *)email;
-    bind[0].buffer_lenght = tam;
-    bind[0].lenght = &tam;
+    bind[0].buffer_length = tam;
+    bind[0].length = &tam;
 
     if (mysql_stmt_bind_param(stmt, bind) != 0 || mysql_stmt_execuete(stmt) != 0 || mysql_stmt_store_result(stmt) != 0)
     {
@@ -1564,8 +1564,8 @@ int telefone_jogador_existe(MYSQL *conexao, const char *telefone)
     memset(bind, 0, sizeof(bind));
     bind[0].buffer_type = MYSQL_TYPE_STRING;
     bind[0].buffer = (char *)telefone;
-    bind[0].buffer_lenght = tam;
-    bind[0].lenght = &tam;
+    bind[0].buffer_length = tam;
+    bind[0].length = &tam;
 
     if (mysql_stmt_bind_param(stmt, bind) != 0 || mysql_stmt_execuete(stmt) != 0 || mysql_stmt_store_result(stmt) != 0)
     {

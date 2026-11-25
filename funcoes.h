@@ -31,7 +31,8 @@ int Buscar_Equipe_Pelo_ID(
 int Cadastrar_Jogadores(
     Jogador jogadores[],
     Equipe equipes[],
-    int qntd_equipes
+    int qntd_equipes,
+    MYSQL *conexao
 );
 
 int Cadastrar_Partida(

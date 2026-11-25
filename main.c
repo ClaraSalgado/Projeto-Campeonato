@@ -343,7 +343,8 @@ int main(void)
         qntd_jogadores = Cadastrar_Jogadores(
             jogadores,
             equipes,
-            qntd_equipes);
+            qntd_equipes,
+            conexao);
 
         for (int i = 0; i < qntd_jogadores; i++)
         {
