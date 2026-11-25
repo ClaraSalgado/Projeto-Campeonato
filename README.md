@@ -1,4 +1,3 @@
-[README-2.md](https://github.com/user-attachments/files/35426042/README-2.md)
 # Sistema de Gerenciamento de Campeonatos de eSports
 
 ## Sobre o projeto
