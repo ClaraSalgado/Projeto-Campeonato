@@ -14,6 +14,10 @@ MYSQL *Conectar_Banco(void)
         return NULL;
     }
 
+    char desativar_ssl = 0;
+    mysql_options(conexao, MYSQL_OPT_SSL_ENFORCE, &desativar_ssl);
+    mysql_options(conexao, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, &desativar_ssl);
+
     if (mysql_real_connect(
             conexao,
             "localhost",
@@ -459,12 +463,12 @@ int Salvar_Classificacao_Banco(
         return 0;
     }
 
-        int id_encontrado;
-        char existe = 0;
-        
+    int id_encontrado;
+    char existe = 0;
+
     MYSQL_BIND resultado_busca;
     memset(&resultado_busca, 0, sizeof(resultado_busca));
-    
+
     resultado_busca.buffer_type = MYSQL_TYPE_LONG;
     resultado_busca.buffer = &id_encontrado;
     resultado_busca.is_null = &existe;

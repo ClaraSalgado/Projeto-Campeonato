@@ -18,7 +18,7 @@ MYSQL *Conectar_Banco(void)
             conexao,
             "localhost",
             "root",
-            "",
+            "1234",
             "esports",
             3306,
             NULL,
@@ -460,7 +460,7 @@ int Salvar_Classificacao_Banco(
     }
 
     int id_encontrado;
-    bool existe = 0;
+    char existe = 0;
 
     MYSQL_BIND resultado_busca;
     memset(&resultado_busca, 0, sizeof(resultado_busca));
@@ -1499,7 +1499,7 @@ int nome_equipe_existe(MYSQL *conexao, const char *nome_equipe)
     bind[0].buffer_length = tam;
     bind[0].length = &tam;
 
-    if (mysql_stmt_bind_param(stmt, bind) != 0 || mysql_stmt_execuete(stmt) != 0 || mysql_stmt_store_result(stmt) != 0)
+    if (mysql_stmt_bind_param(stmt, bind) != 0 || mysql_stmt_execute(stmt) != 0 || mysql_stmt_store_result(stmt) != 0)
     {
         fprintf(stderr, "Erro na consulta: %s\n", mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
@@ -1533,7 +1533,7 @@ int email_jogador_existe(MYSQL *conexao, const char *email)
     bind[0].buffer_length = tam;
     bind[0].length = &tam;
 
-    if (mysql_stmt_bind_param(stmt, bind) != 0 || mysql_stmt_execuete(stmt) != 0 || mysql_stmt_store_result(stmt) != 0)
+    if (mysql_stmt_bind_param(stmt, bind) != 0 || mysql_stmt_execute(stmt) != 0 || mysql_stmt_store_result(stmt) != 0)
     {
         fprintf(stderr, "Erro na consulta: %s\n", mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
@@ -1567,7 +1567,7 @@ int telefone_jogador_existe(MYSQL *conexao, const char *telefone)
     bind[0].buffer_length = tam;
     bind[0].length = &tam;
 
-    if (mysql_stmt_bind_param(stmt, bind) != 0 || mysql_stmt_execuete(stmt) != 0 || mysql_stmt_store_result(stmt) != 0)
+    if (mysql_stmt_bind_param(stmt, bind) != 0 || mysql_stmt_execuste(stmt) != 0 || mysql_stmt_store_result(stmt) != 0)
     {
         fprintf(stderr, "Erro na consulta: %s\n", mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
